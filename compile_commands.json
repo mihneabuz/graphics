@@ -1,0 +1,18 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-I./include",
+      "-o",
+      "tests",
+      "test/tests.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/test/tests.c",
+    "output": "/home/mihnea/personal/graphics/tests"
+  }
+]
