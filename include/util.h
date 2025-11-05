@@ -8,6 +8,11 @@
 
 #define nullptr NULL
 
+#define true 1
+#define false 0
+
+#define unused(x) (void)x;
+
 #define C_RED "\033[31m"
 #define C_GREEN "\033[32m"
 #define C_NORMAL "\033[0m"

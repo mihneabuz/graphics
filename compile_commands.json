@@ -2,11 +2,48 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-I./include",
+      "-O3",
+      "-c",
+      "-o",
+      "glad.o",
+      "src/glad.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/glad.c",
+    "output": "/home/mihnea/personal/graphics/glad.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
       "-c",
       "-Wall",
       "-Wextra",
       "-std=c11",
       "-I./include",
+      "-O3",
+      "glad.o",
+      "-o",
+      "app",
+      "src/main.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/main.c",
+    "output": "/home/mihnea/personal/graphics/app"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-I./include",
+      "-g",
+      "-O0",
       "-o",
       "tests",
       "test/tests.c"
