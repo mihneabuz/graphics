@@ -8,16 +8,21 @@ RELEASE_FLAGS = $(FLAGS) -O3
 build: app tests
 
 check:
-	clang-tidy include/* test/*
+	clang-tidy include/*.h test/tests.c src/main.c
 
 run: app
 	./app
 
-app: src/main.c glad.o
-	$(CC) $(RELEASE_FLAGS) -o app glad.o src/main.c
+app: src/main.c glad.o shaders
+	$(CC) $(RELEASE_FLAGS) src/main.c glad.o -o app
 
 glad.o: src/glad.c
-	$(CC) $(RELEASE_FLAGS) -c -o glad.o src/glad.c
+	$(CC) $(RELEASE_FLAGS) -c src/glad.c -o glad.o
+
+shaders: src/vertex.glsl
+	rm -f include/shaders.h
+	xxd -n vertexShaderSource -i src/vertex.glsl >> include/shaders.h
+	xxd -n fragmentShaderSource -i src/fragment.glsl >> include/shaders.h
 
 tests: test/tests.c
 	$(CC) $(DEBUG_FLAGS) -o tests test/tests.c
@@ -31,4 +36,4 @@ valgrind: tests
 clean:
 	rm -f app glad.o tests vgcore.*
 
-.PHONY: clean tests check
+.PHONY: clean tests check shaders

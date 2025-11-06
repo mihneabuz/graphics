@@ -25,7 +25,6 @@
       "-std=c11",
       "-I./include",
       "-O3",
-      "glad.o",
       "-o",
       "app",
       "src/main.c"
