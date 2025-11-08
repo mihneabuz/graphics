@@ -2,7 +2,7 @@
 
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>
+#include <math.h>
 
 #include "shaders.h"
 #include "util.h"
@@ -69,41 +69,14 @@ void compileShaderProgram() {
     glDeleteShader(fragmentShader);
 }
 
-static GLuint SquareVAO;
 static GLuint TriangleVAO;
 
-void initializeSquareData() {
-    float vertices[] = {0.5f, -0.9f, 0.0f, 0.5f, -0.1f, 0.0f, -0.5f, -0.1f, 0.0f, -0.5f, -0.9f, 0.0f};
-    unsigned indices[] = {0, 1, 3, 1, 2, 3};
-
-    glGenVertexArrays(1, &SquareVAO);
-    glBindVertexArray(SquareVAO);
-
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    GLuint EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
-}
-
-void drawSquare() {
-    glBindVertexArray(SquareVAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-
-void initializeTriagleVAO() {
+void initializeVertexData() {
     float vertices[] = {
-        0.0f, 0.9f, 0.0f, 0.5f, 0.1f, 0.0f, -0.5f, 0.1f, 0.0f,
+        // positions             // colors
+        0.5f,  -0.5f, 0.0f, /**/ 1.0f, 0.0f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f, /**/ 0.0f, 1.0f, 0.0f,  // bottom left
+        0.0f,  0.5f,  0.0f, /**/ 0.0f, 0.0f, 1.0f   // top
     };
 
     glGenVertexArrays(1, &TriangleVAO);
@@ -114,27 +87,22 @@ void initializeTriagleVAO() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
-}
 
-void drawTriangle() {
-    glBindVertexArray(TriangleVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-}
-
-void initializeVertexData() {
-    initializeSquareData();
-    initializeTriagleVAO();
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 }
 
 void drawFrame() {
-    glUseProgram(shaderProgram);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(shaderProgram);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    drawSquare();
-    drawTriangle();
+
+    glBindVertexArray(TriangleVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
 }
 
 int main() {
@@ -157,7 +125,7 @@ int main() {
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.08f, 0.12f, 0.18f, 1.0f);
 
     compileShaderProgram();
     initializeVertexData();

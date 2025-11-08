@@ -1,5 +1,5 @@
 CC = gcc
-INCLUDE = -I./include -lglfw -lGL
+INCLUDE = -I./include -lglfw -lGL -lm
 FLAGS = -Wall -Wextra -std=c11 $(INCLUDE)
 
 DEBUG_FLAGS = $(FLAGS) -g -O0
