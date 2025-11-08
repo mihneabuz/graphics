@@ -17,6 +17,7 @@
 #define C_GREEN "\033[32m"
 #define C_NORMAL "\033[0m"
 
+typedef void (*callback)();
 typedef int (*comparator)(void*, void*);
 typedef uint64_t (*hasher)(void*);
 typedef void (*mapper)(void*);
@@ -50,6 +51,35 @@ static inline uint32_t next_power_of_2(uint32_t size) {
     size++;
 
     return size;
+}
+
+static inline char* read_file(const char* path) {
+    int ret;
+
+    FILE* file = fopen(path, "r");
+    if (!file)
+        return nullptr;
+
+    ret = fseek(file, 0, SEEK_END);
+    if (ret != 0)
+        return nullptr;
+
+    uint32_t size = ftell(file);
+
+    ret = fseek(file, 0, SEEK_SET);
+    if (ret != 0)
+        return nullptr;
+
+    char* buffer = malloc((size_t)size + 1);
+    if (!buffer)
+        panic("read_file: failed to allocate memory");
+
+    fread(buffer, size, 1, file);
+    buffer[size] = '\0';
+
+    fclose(file);
+
+    return buffer;
 }
 
 #endif

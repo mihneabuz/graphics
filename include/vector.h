@@ -72,17 +72,21 @@ static inline int vec_set(struct vector* vec, const uint32_t idx, const void* it
     return 1;
 }
 
-static inline void vec_push(struct vector* vec, const void* item) {
+static inline void* vec_emplace(struct vector* vec) {
     if (vec->size == vec->capacity) {
         uint32_t new_capacity = vec->capacity == 0 ? 8 : next_power_of_2(vec->capacity + 1);
-
         vec_realloc(vec, new_capacity);
     }
 
     void* slot = (uint8_t*)vec->data + vec->size * vec->item_size;
-    memcpy(slot, item, vec->item_size);
-
     vec->size += 1;
+
+    return slot;
+}
+
+static inline void vec_push(struct vector* vec, const void* item) {
+    void* slot = vec_emplace(vec);
+    memcpy(slot, item, vec->item_size);
 }
 
 static inline int vec_pop(struct vector* vec, void* dest) {

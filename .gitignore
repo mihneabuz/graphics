@@ -1,5 +1,4 @@
 /.cache
-/tests
+/test/tests
 /vgcore.*
-/app
-/glad.o
+/bin/
