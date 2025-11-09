@@ -23,8 +23,9 @@ BIN_DIR = bin
 GLAD_OBJ = $(BIN_DIR)/glad.o
 
 TRIANGLE_BIN = $(BIN_DIR)/triangle
+TEXTURE_BIN = $(BIN_DIR)/texture
 
-BINS = $(TRIANGLE_BIN)
+BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN)
 
 # ================ COMMANDS ================
 
@@ -53,7 +54,14 @@ run_triangle: $(TRIANGLE_BIN)
 debug_triangle: $(TRIANGLE_BIN)
 	gdb ./$(TRIANGLE_BIN)
 
--include $(BIN_DIR)/*.d
+$(TEXTURE_BIN): $(SRC_DIR)/texture.c $(GLAD_OBJ) | $(BIN_DIR)
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+
+run_texture: $(TEXTURE_BIN)
+	./$(TEXTURE_BIN)
+
+debug_texture: $(TEXTURE_BIN)
+	gdb ./$(TEXTURE_BIN)
 
 # ================ TESTS ================
 

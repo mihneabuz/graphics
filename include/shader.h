@@ -94,4 +94,20 @@ static inline void shader_set_float(struct shader* shader, const char* name, flo
     glUniform1f(glGetUniformLocation(shader->program, name), value);
 }
 
+static inline void shader_set_vec3(struct shader* shader,
+                                   const char* name,
+                                   float x,
+                                   float y,
+                                   float z) {
+    glUniform3f(glGetUniformLocation(shader->program, name), x, y, z);
+}
+
+static inline void shader_set_mat3(struct shader* shader, const char* name, float* mat) {
+    glUniformMatrix3fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, mat);
+}
+
+static inline void shader_uninit(struct shader* shader) {
+    glDeleteProgram(shader->program);
+}
+
 #endif

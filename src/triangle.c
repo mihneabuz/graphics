@@ -1,13 +1,11 @@
 #include "glad/glad.h"
 
 #include <math.h>
-#include <stdio.h>
 
 #include "shader.h"
 #include "window.h"
 
 static struct shader Shader;
-
 static GLuint TriangleVAO;
 
 void init_vertex_data() {
