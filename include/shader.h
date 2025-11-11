@@ -75,7 +75,7 @@ static inline int shader_init(struct shader* shader, const char* vertex, const c
         return 0;
 
     shader->program = program;
-    return 0;
+    return 1;
 }
 
 static inline void shader_activate(struct shader* shader) {
