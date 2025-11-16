@@ -1,7 +1,5 @@
-#include "glad/glad.h"
-
-#include "shader.h"
 #include "texture.h"
+#include "shader.h"
 #include "window.h"
 
 static struct shader Shader;
@@ -66,12 +64,12 @@ void draw() {
 
     float sint = sin(glfwGetTime() / 2.);
     float cost = cos(glfwGetTime() / 2.);
-    float rotation[] = {
-        cost,  0, sint,  //
-        0,     1, 0,     //
-        -sint, 0, cost,  //
+    mat3 rotation = {
+        {cost, 0, sint},
+        {0, 1, 0},
+        {-sint, 0, cost},
     };
-    shader_set_mat3(&Shader, "rotation", rotation);
+    shader_set_mat3(&Shader, "rotation", &rotation);
 
     shader_set_float(&Shader, "blend", blend);
 

@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <stdio.h>
+#include "mmath.h"
 #include "util.h"
 
 struct shader {
@@ -102,8 +103,12 @@ static inline void shader_set_vec3(struct shader* shader,
     glUniform3f(glGetUniformLocation(shader->program, name), x, y, z);
 }
 
-static inline void shader_set_mat3(struct shader* shader, const char* name, float* mat) {
-    glUniformMatrix3fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, mat);
+static inline void shader_set_mat3(struct shader* shader, const char* name, mat3* mat) {
+    glUniformMatrix3fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, (float*)mat);
+}
+
+static inline void shader_set_mat4(struct shader* shader, const char* name, mat4* mat) {
+    glUniformMatrix4fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, (float*)mat);
 }
 
 static inline void shader_uninit(struct shader* shader) {
