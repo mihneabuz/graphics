@@ -2,3 +2,4 @@
 /test/tests
 /vgcore.*
 /bin/
+/include/gl_loader.h

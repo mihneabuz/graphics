@@ -2,53 +2,73 @@
   {
     "arguments": [
       "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-I./include",
-      "-O3",
-      "-c",
-      "-o",
-      "glad.o",
-      "src/glad.c"
-    ],
-    "directory": "/home/mihnea/personal/graphics",
-    "file": "/home/mihnea/personal/graphics/src/glad.c",
-    "output": "/home/mihnea/personal/graphics/glad.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
       "-c",
       "-Wall",
       "-Wextra",
       "-std=c11",
-      "-I./include",
-      "-O3",
-      "-o",
-      "app",
-      "src/main.c"
-    ],
-    "directory": "/home/mihnea/personal/graphics",
-    "file": "/home/mihnea/personal/graphics/src/main.c",
-    "output": "/home/mihnea/personal/graphics/app"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-c",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-I./include",
+      "-Iinclude",
       "-g",
       "-O0",
       "-o",
-      "tests",
+      "bin/triangle",
+      "src/triangle.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/triangle.c",
+    "output": "/home/mihnea/personal/graphics/bin/triangle"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "bin/texture",
+      "src/texture.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/texture.c",
+    "output": "/home/mihnea/personal/graphics/bin/texture"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "bin/transform",
+      "src/transform.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/transform.c",
+    "output": "/home/mihnea/personal/graphics/bin/transform"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "test/tests",
       "test/tests.c"
     ],
     "directory": "/home/mihnea/personal/graphics",
     "file": "/home/mihnea/personal/graphics/test/tests.c",
-    "output": "/home/mihnea/personal/graphics/tests"
+    "output": "/home/mihnea/personal/graphics/test/tests"
   }
 ]

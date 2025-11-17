@@ -13,14 +13,13 @@ else
 endif
 
 INCLUDE_DIR = include
+INCLUDE_LOADER = $(INCLUDE_DIR)/gl_loader.h
 
 TEST_DIR = test
 TEST_BIN = $(TEST_DIR)/tests
 
 SRC_DIR = src
 BIN_DIR = bin
-
-GLAD_OBJ = $(BIN_DIR)/glad.o
 
 TRIANGLE_BIN = $(BIN_DIR)/triangle
 TEXTURE_BIN = $(BIN_DIR)/texture
@@ -36,17 +35,17 @@ check:
 	clang-tidy $(INCLUDE_DIR)/*.h $(SRC_DIR)/*.c $(TEST_DIR)/tests.c
 
 clean:
-	rm -f $(TEST_BIN) $(GLAD_OBJ) $(BINS)
+	rm -f $(INCLUDE_LOADER) $(TEST_BIN) $(BINS)
 
 # ================ BINARIES ================
+
+$(INCLUDE_LOADER):
+	./loader/generate.py > $@
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-$(GLAD_OBJ): $(SRC_DIR)/glad.c | $(BIN_DIR)
-	$(CC) $(FLAGS) -c $(SRC_DIR)/glad.c -o $@
-
-$(TRIANGLE_BIN): $(SRC_DIR)/triangle.c $(GLAD_OBJ) | $(BIN_DIR)
+$(TRIANGLE_BIN): $(SRC_DIR)/triangle.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_triangle: $(TRIANGLE_BIN)
@@ -55,7 +54,7 @@ run_triangle: $(TRIANGLE_BIN)
 debug_triangle: $(TRIANGLE_BIN)
 	gdb ./$(TRIANGLE_BIN)
 
-$(TEXTURE_BIN): $(SRC_DIR)/texture.c $(GLAD_OBJ) | $(BIN_DIR)
+$(TEXTURE_BIN): $(SRC_DIR)/texture.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_texture: $(TEXTURE_BIN)
@@ -64,7 +63,7 @@ run_texture: $(TEXTURE_BIN)
 debug_texture: $(TEXTURE_BIN)
 	gdb ./$(TEXTURE_BIN)
 
-$(TRANSFORM_BIN): $(SRC_DIR)/transform.c $(GLAD_OBJ) | $(BIN_DIR)
+$(TRANSFORM_BIN): $(SRC_DIR)/transform.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_transform: $(TRANSFORM_BIN)

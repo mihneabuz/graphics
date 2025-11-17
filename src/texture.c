@@ -1,6 +1,4 @@
-#include "texture.h"
-#include "shader.h"
-#include "window.h"
+#include "graphics.h"
 
 static struct shader Shader;
 static struct texture Wall;

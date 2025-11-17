@@ -1,8 +1,9 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <glad/glad.h>
 #include <stdio.h>
+
+#include "gl_loader.h"
 #include "mmath.h"
 #include "util.h"
 

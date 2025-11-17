@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "glad/glad.h"
+#include "gl_loader.h"
 
 #include <stdint.h>
 

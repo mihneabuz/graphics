@@ -1,10 +1,12 @@
-#include "glad/glad.h"
-
-#include <GLFW/glfw3.h>
 #include <stdio.h>
+
+#define GL_LOADER
+#include "gl_loader.h"
 
 #include "util.h"
 #include "vector.h"
+
+#include <GLFW/glfw3.h>
 
 struct key_handler {
     callback handler;
@@ -50,7 +52,7 @@ static inline int window_init(uint32_t width, uint32_t height) {
 
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!load_gl_procs((ProcLoader)glfwGetProcAddress)) {
         printf("window_init failed:\ncould not load OpenGL\n");
         return 0;
     }

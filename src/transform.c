@@ -1,7 +1,4 @@
-#include "mmath.h"
-#include "shader.h"
-#include "texture.h"
-#include "window.h"
+#include "graphics.h"
 
 static struct shader Shader;
 static struct texture Face;
@@ -53,7 +50,7 @@ void draw() {
     shader_activate(&Shader);
 
     texture_bind(&Face, 0);
-    shader_set_int(&Shader, "texture1", 0);
+    shader_set_int(&Shader, "texture0", 0);
 
     mat4 transform = identity();
     mat4_comp(&transform, translate((vec3){0.5, -0.5, 0.}));
