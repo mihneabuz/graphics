@@ -115,10 +115,10 @@ static inline mat4 identity() {
 
 static inline mat4 translate(vec3 t) {
     return (mat4){
-        {1, 0, 0, 0},
-        {0, 1, 0, 0},
-        {0, 0, 1, 0},
-        {t.x, t.y, t.z, 1},
+        {1, 0, 0, t.x},
+        {0, 1, 0, t.y},
+        {0, 0, 1, t.z},
+        {0, 0, 0, 1},
     };
 }
 
@@ -209,7 +209,7 @@ static inline mat4 mat4_mul(mat4 a, mat4 b) {
 }
 
 static inline void mat4_comp(mat4* transform, mat4 m) {
-    *transform = mat4_mul(m, *transform);
+    *transform = mat4_mul(*transform, m);
 };
 
 static inline vec4 mat4_apply(mat4 m, vec4 v) {
