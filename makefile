@@ -24,8 +24,9 @@ GLAD_OBJ = $(BIN_DIR)/glad.o
 
 TRIANGLE_BIN = $(BIN_DIR)/triangle
 TEXTURE_BIN = $(BIN_DIR)/texture
+TRANSFORM_BIN = $(BIN_DIR)/transform
 
-BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN)
+BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN)
 
 # ================ COMMANDS ================
 
@@ -62,6 +63,15 @@ run_texture: $(TEXTURE_BIN)
 
 debug_texture: $(TEXTURE_BIN)
 	gdb ./$(TEXTURE_BIN)
+
+$(TRANSFORM_BIN): $(SRC_DIR)/transform.c $(GLAD_OBJ) | $(BIN_DIR)
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+
+run_transform: $(TRANSFORM_BIN)
+	./$(TRANSFORM_BIN)
+
+debug_transform: $(TRANSFORM_BIN)
+	gdb ./$(TRANSFORM_BIN)
 
 # ================ TESTS ================
 

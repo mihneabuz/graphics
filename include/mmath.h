@@ -208,6 +208,10 @@ static inline mat4 mat4_mul(mat4 a, mat4 b) {
     };
 }
 
+static inline void mat4_comp(mat4* transform, mat4 m) {
+    *transform = mat4_mul(m, *transform);
+};
+
 static inline vec4 mat4_apply(mat4 m, vec4 v) {
     return (vec4){
         .x = v.x * m.x.x + v.y * m.x.y + v.z * m.x.z + v.w * m.x.w,
