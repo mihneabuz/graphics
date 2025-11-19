@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "image.h"
 #include "list.h"
 #include "map.h"
 #include "queue.h"
@@ -63,6 +64,16 @@ void test_vec_push() {
 
     for (int i = 0; i < 20; i++) {
         assert_eq(*(int*)vec_item(&v, i), i);
+    }
+
+    int items[4] = {0, 1, 2, 3};
+    vec_extend(&v, items, 4);
+
+    assert_eq(v.size, 24);
+    assert_eq(v.capacity, 32);
+
+    for (int i = 0; i < 4; i++) {
+        assert_eq(*(int*)vec_item(&v, i + 20), i);
     }
 
     vec_uninit(&v);
@@ -434,6 +445,22 @@ void test_map_str() {
     map_uninit(&m);
 }
 
+void test_image_png() {
+    struct image img;
+    assert(image_load("assets/blue.png", &img));
+
+    assert_eq(img.width, 32);
+    assert_eq(img.height, 32);
+    assert_eq(img.channels, 3);
+    assert(img.data != nullptr);
+
+    assert_eq(img.data[100 * 3 + 0], 0);    // R
+    assert_eq(img.data[100 * 3 + 1], 66);   // G
+    assert_eq(img.data[100 * 3 + 2], 216);  // B
+
+    image_uninit(&img);
+}
+
 #define test_func(fun)         \
     (struct test) {            \
         .name = #fun, .f = fun \
@@ -460,6 +487,8 @@ int main() {
     vec_push(&tests, &test_func(test_map_insert));
     vec_push(&tests, &test_func(test_map_remove));
     vec_push(&tests, &test_func(test_map_str));
+
+    vec_push(&tests, &test_func(test_image_png));
 
     for (int i = 0; i < (int)tests.size; i++) {
         vec_get(&tests, i, &current_test);

@@ -1,7 +1,7 @@
 CC = gcc
 INCLUDE = -Iinclude
-LIBS = -lglfw -lGL -lm
-FLAGS = -Wall -Wextra -std=c11 $(INCLUDE)
+LIBS = -lglfw -lGL -lm -lz
+FLAGS = -Wall -Wextra -std=c23 $(INCLUDE)
 
 MODE ?= debug
 ifeq ($(MODE),debug)
@@ -84,7 +84,7 @@ test_gdb: $(TEST_BIN)
 	gdb ./$(TEST_BIN)
 
 $(TEST_BIN): $(TEST_DIR)/tests.c
-	$(CC) $(FLAGS) $^ -o $@
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 
 .PHONY: clean check test test_valgrind test_gdb

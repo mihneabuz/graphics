@@ -1,12 +1,10 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "gl_loader.h"
-
 #include <stdint.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "gl_loader.h"
+#include "image.h"
 
 struct texture {
     uint32_t width, height, channels;
@@ -14,11 +12,10 @@ struct texture {
 };
 
 static inline int texture_load_image(struct texture* tex, const char* path) {
-    stbi_set_flip_vertically_on_load(1);
+    struct image img;
 
-    int width, height, channels;
-    unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
-    if (!data) {
+    int ret = image_load(path, &img);
+    if (!ret) {
         tex->width = 0;
         tex->height = 0;
         tex->channels = 0;
@@ -35,15 +32,29 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    int format = channels == 4 ? GL_RGBA : GL_RGB;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    int format;
+    switch (img.channels) {
+        case 1:
+        case 2:
+            image_uninit(&img);
+            return 0;
+        case 3:
+            format = GL_RGB;
+            break;
+        case 4:
+            format = GL_RGBA;
+            break;
+    };
 
-    stbi_image_free(data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,
+                 img.data);
 
-    tex->width = width;
-    tex->height = height;
-    tex->channels = channels;
+    tex->width = img.width;
+    tex->height = img.height;
+    tex->channels = img.channels;
     tex->id = texture;
+
+    image_uninit(&img);
 
     return 1;
 }

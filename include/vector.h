@@ -89,6 +89,16 @@ static inline void vec_push(struct vector* vec, const void* item) {
     memcpy(slot, item, vec->item_size);
 }
 
+static inline void vec_extend(struct vector* vec, const void* from, uint32_t count) {
+    if (count > vec->capacity - vec->size)
+        vec_realloc(vec, next_power_of_2(count + vec->size));
+
+    void* start = (uint8_t*)vec->data + vec->size * vec->item_size;
+    memcpy(start, from, count * vec->item_size);
+
+    vec->size += count;
+}
+
 static inline int vec_pop(struct vector* vec, void* dest) {
     if (vec->size == 0)
         return 0;
@@ -150,7 +160,8 @@ static inline void vec_uninit(struct vector* vec) {
 }
 
 static inline void vec_debug(struct vector* vec) {
-    printf("Vector size = %d capacity = %d item_size = %d\n", vec->size, vec->capacity, vec->item_size);
+    printf("Vector size = %d capacity = %d item_size = %d\n", vec->size, vec->capacity,
+           vec->item_size);
 }
 
 #endif
