@@ -30,10 +30,9 @@ void init_vertex_data() {
     glEnableVertexAttribArray(1);
 }
 
-void draw() {
+void draw(float time) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    float time = glfwGetTime();
     float elapsed = last_draw - time;
     accumulator += elapsed * speed;
     last_draw = time;

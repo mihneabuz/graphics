@@ -49,7 +49,7 @@ void init() {
     init_vertex_data();
 }
 
-void draw() {
+void draw(float time) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader_activate(&Shader);
@@ -60,7 +60,7 @@ void draw() {
     texture_bind(&Face, 1);
     shader_set_int(&Shader, "texture1", 1);
 
-    mat4 transform = rotate_y(glfwGetTime() * 45.);
+    mat4 transform = rotate_y(45 * time);
     shader_set_mat4(&Shader, "transform", &transform);
 
     shader_set_float(&Shader, "blend", blend);

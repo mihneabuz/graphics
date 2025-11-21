@@ -15,11 +15,13 @@ struct key_handler {
     double last_press;
 };
 
+typedef void (*render_callback)(float time);
+
 struct window {
     GLFWwindow* glfw;
     uint32_t width;
     uint32_t height;
-    callback render;
+    render_callback render;
     struct vector key_handlers;
 };
 
@@ -69,7 +71,7 @@ static inline void window_set_clear_color(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
 
-static inline void window_set_render_callback(callback cb) {
+static inline void window_set_render_callback(render_callback cb) {
     Window.render = cb;
 }
 
@@ -101,7 +103,7 @@ static inline void window_run() {
         vec_for_each(&Window.key_handlers, key_handler_check_and_run);
 
         if (Window.render)
-            Window.render();
+            Window.render(glfwGetTime());
 
         glfwSwapBuffers(Window.glfw);
         glfwPollEvents();
