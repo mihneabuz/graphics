@@ -32,6 +32,7 @@ static inline int image_load(const char* path, struct image* img) {
             return l->parser(raw, img);
     }
 
+    free(raw);
     return 1;
 }
 
@@ -62,6 +63,7 @@ static inline int image_write(struct image* img, const char* path, const char* f
     if (strncmp(format, "ppm", 3) == 0)
         return image_write_ppm(img, file);
 
+    fclose(file);
     return 1;
 }
 

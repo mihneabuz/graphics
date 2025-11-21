@@ -30,7 +30,7 @@ static inline void png_parser_state_init(struct png_parser_state* state) {
     state->channels = 0;
     state->bit_depth = 0;
     state->color_indexed = 0;
-    state->color_spec = 0;
+    state->color_spec = SRGB;
     state->done = 0;
     vec_init(&state->encoded_data, 1);
     vec_init(&state->palette, 1);
@@ -248,7 +248,11 @@ static inline void png_load(struct png_parser_state* state, struct image* img) {
     img->width = state->width;
     img->height = state->height;
     img->channels = state->channels;
+
     uint32_t img_size = img->width * img->height * img->channels;
+    if (img_size == 0)
+        return;
+
     img->data = malloc(img_size);
     if (!img->data)
         panic("png_load: failed to allocate memory");

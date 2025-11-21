@@ -34,16 +34,18 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
 
     int format;
     switch (img.channels) {
-        case 1:
-        case 2:
-            image_uninit(&img);
-            return 0;
         case 3:
             format = GL_RGB;
             break;
         case 4:
             format = GL_RGBA;
             break;
+
+        case 1:
+        case 2:
+        default:
+            image_uninit(&img);
+            return 0;
     };
 
     glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,

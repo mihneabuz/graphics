@@ -90,6 +90,9 @@ static inline void vec_push(struct vector* vec, const void* item) {
 }
 
 static inline void vec_extend(struct vector* vec, const void* from, uint32_t count) {
+    if (!from || !count)
+        return;
+
     if (count > vec->capacity - vec->size)
         vec_realloc(vec, next_power_of_2(count + vec->size));
 
