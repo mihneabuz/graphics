@@ -3,7 +3,7 @@
 static struct shader Shader;
 static struct texture Wall;
 static struct texture Face;
-static float blend = 0.8;
+static float blend = 0.6;
 static GLuint VAO;
 
 void init_vertex_data() {
@@ -60,14 +60,8 @@ void draw() {
     texture_bind(&Face, 1);
     shader_set_int(&Shader, "texture1", 1);
 
-    float sint = sin(glfwGetTime() / 2.);
-    float cost = cos(glfwGetTime() / 2.);
-    mat3 rotation = {
-        {cost, 0, sint},
-        {0, 1, 0},
-        {-sint, 0, cost},
-    };
-    shader_set_mat3(&Shader, "rotation", &rotation);
+    mat4 transform = rotate_y(glfwGetTime() * 45.);
+    shader_set_mat4(&Shader, "transform", &transform);
 
     shader_set_float(&Shader, "blend", blend);
 
