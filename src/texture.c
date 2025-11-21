@@ -3,7 +3,7 @@
 static struct shader Shader;
 static struct texture Wall;
 static struct texture Face;
-static float blend = 0.6;
+static float blend = 0.8;
 static GLuint VAO;
 
 void init_vertex_data() {

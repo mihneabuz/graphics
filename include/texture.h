@@ -46,7 +46,7 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
             break;
     };
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,
                  img.data);
 
     tex->width = img.width;
