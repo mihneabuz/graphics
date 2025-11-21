@@ -2,6 +2,7 @@
 #define MMATH_H
 
 #include <math.h>
+#include <stdio.h>
 
 static inline float radians(float degrees) {
     return degrees * acos(-1.) / 180.;
@@ -60,6 +61,10 @@ static inline vec4 vec4_new(float value) {
     };
 }
 
+static inline void vec4_debug(vec4* v) {
+    printf("[ %f ]\n[ %f ]\n[ %f ]\n[ %f ]\n", v->x, v->y, v->z, v->w);
+}
+
 static inline vec4 vec4_hom(vec3 v) {
     return (vec4){
         .x = v.x,
@@ -104,6 +109,22 @@ static inline mat4 mat4_new(float value) {
     };
 }
 
+static inline void mat4_debug(mat4* m) {
+    printf("[ %f  %f  %f  %f ]\n", m->x.x, m->y.x, m->z.x, m->w.x);
+    printf("[ %f  %f  %f  %f ]\n", m->x.y, m->y.y, m->z.y, m->w.y);
+    printf("[ %f  %f  %f  %f ]\n", m->x.z, m->y.z, m->z.z, m->w.z);
+    printf("[ %f  %f  %f  %f ]\n", m->x.w, m->y.w, m->z.w, m->w.w);
+}
+
+static inline mat4 mat4_trans(mat4 m) {
+    return (mat4){
+        {m.x.x, m.y.x, m.z.x, m.w.x},
+        {m.x.y, m.y.y, m.z.y, m.w.y},
+        {m.x.z, m.y.z, m.z.z, m.w.z},
+        {m.x.w, m.y.w, m.z.w, m.w.w},
+    };
+}
+
 static inline mat4 identity() {
     return (mat4){
         {1, 0, 0, 0},
@@ -115,10 +136,10 @@ static inline mat4 identity() {
 
 static inline mat4 translate(vec3 t) {
     return (mat4){
-        {1, 0, 0, t.x},
-        {0, 1, 0, t.y},
-        {0, 0, 1, t.z},
-        {0, 0, 0, 1},
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        {t.x, t.y, t.z, 1},
     };
 }
 
@@ -166,8 +187,8 @@ static inline mat4 rotate_z(float degrees) {
 
 static inline mat4 perspective(float fov, float aspect_ratio, float near, float far) {
     float tangent = tan(radians(fov / 2));
-    float right = near * tangent;
-    float top = right / aspect_ratio;
+    float top = near * tangent;
+    float right = top * aspect_ratio;
 
     mat4 m = mat4_new(0.);
     m.x.x = near / right;
@@ -182,34 +203,34 @@ static inline mat4 perspective(float fov, float aspect_ratio, float near, float 
 static inline mat4 mat4_mul(mat4 a, mat4 b) {
     return (mat4){
         {
-            a.x.x * b.x.x + a.x.y * b.y.x + a.x.z * b.z.x + a.x.w * b.w.x,
-            a.x.x * b.x.y + a.x.y * b.y.y + a.x.z * b.z.y + a.x.w * b.w.y,
-            a.x.x * b.x.z + a.x.y * b.y.z + a.x.z * b.z.z + a.x.w * b.w.z,
-            a.x.x * b.x.w + a.x.y * b.y.w + a.x.z * b.z.w + a.x.w * b.w.w,
+            a.x.x * b.x.x + a.y.x * b.x.y + a.z.x * b.x.z + a.w.x * b.x.w,
+            a.x.y * b.x.x + a.y.y * b.x.y + a.z.y * b.x.z + a.w.y * b.x.w,
+            a.x.z * b.x.x + a.y.z * b.x.y + a.z.z * b.x.z + a.w.z * b.x.w,
+            a.x.w * b.x.x + a.y.w * b.x.y + a.z.w * b.x.z + a.w.w * b.x.w,
         },
         {
-            a.y.x * b.x.x + a.y.y * b.y.x + a.y.z * b.z.x + a.y.w * b.w.x,
-            a.y.x * b.x.y + a.y.y * b.y.y + a.y.z * b.z.y + a.y.w * b.w.y,
-            a.y.x * b.x.z + a.y.y * b.y.z + a.y.z * b.z.z + a.y.w * b.w.z,
-            a.y.x * b.x.w + a.y.y * b.y.w + a.y.z * b.z.w + a.y.w * b.w.w,
+            a.x.x * b.y.x + a.y.x * b.y.y + a.z.x * b.y.z + a.w.x * b.y.w,
+            a.x.y * b.y.x + a.y.y * b.y.y + a.z.y * b.y.z + a.w.y * b.y.w,
+            a.x.z * b.y.x + a.y.z * b.y.y + a.z.z * b.y.z + a.w.z * b.y.w,
+            a.x.w * b.y.x + a.y.w * b.y.y + a.z.w * b.y.z + a.w.w * b.y.w,
         },
         {
-            a.z.x * b.x.x + a.z.y * b.y.x + a.z.z * b.z.x + a.z.w * b.w.x,
-            a.z.x * b.x.y + a.z.y * b.y.y + a.z.z * b.z.y + a.z.w * b.w.y,
-            a.z.x * b.x.z + a.z.y * b.y.z + a.z.z * b.z.z + a.z.w * b.w.z,
-            a.z.x * b.x.w + a.z.y * b.y.w + a.z.z * b.z.w + a.z.w * b.w.w,
+            a.x.x * b.z.x + a.y.x * b.z.y + a.z.x * b.z.z + a.w.x * b.z.w,
+            a.x.y * b.z.x + a.y.y * b.z.y + a.z.y * b.z.z + a.w.y * b.z.w,
+            a.x.z * b.z.x + a.y.z * b.z.y + a.z.z * b.z.z + a.w.z * b.z.w,
+            a.x.w * b.z.x + a.y.w * b.z.y + a.z.w * b.z.z + a.w.w * b.z.w,
         },
         {
-            a.w.x * b.x.x + a.w.y * b.y.x + a.w.z * b.z.x + a.w.w * b.w.x,
-            a.w.x * b.x.y + a.w.y * b.y.y + a.w.z * b.z.y + a.w.w * b.w.y,
-            a.w.x * b.x.z + a.w.y * b.y.z + a.w.z * b.z.z + a.w.w * b.w.z,
-            a.w.x * b.x.w + a.w.y * b.y.w + a.w.z * b.z.w + a.w.w * b.w.w,
+            a.x.x * b.w.x + a.y.x * b.w.y + a.z.x * b.w.z + a.w.x * b.w.w,
+            a.x.y * b.w.x + a.y.y * b.w.y + a.z.y * b.w.z + a.w.y * b.w.w,
+            a.x.z * b.w.x + a.y.z * b.w.y + a.z.z * b.w.z + a.w.z * b.w.w,
+            a.x.w * b.w.x + a.y.w * b.w.y + a.z.w * b.w.z + a.w.w * b.w.w,
         },
     };
 }
 
 static inline void mat4_comp(mat4* transform, mat4 m) {
-    *transform = mat4_mul(*transform, m);
+    *transform = mat4_mul(m, *transform);
 };
 
 static inline vec4 mat4_apply(mat4 m, vec4 v) {
