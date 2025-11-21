@@ -1,7 +1,7 @@
-#include <stdint.h>
 #include "image.h"
 #include "list.h"
 #include "map.h"
+#include "mmath.h"
 #include "queue.h"
 #include "util.h"
 #include "vector.h"
@@ -163,7 +163,8 @@ void test_queue_back() {
 
     int out = 0;
     assert(queue_pop_back(&q, &out));
-    assert_eq(out, 4) assert(queue_pop_back(&q, &out));
+    assert_eq(out, 4);
+    assert(queue_pop_back(&q, &out));
     assert_eq(out, 3);
 
     for (int i = 0; i < 20; i++)
@@ -190,7 +191,7 @@ void test_queue_front() {
 
     int out = 0;
     assert(queue_pop_front(&q, &out));
-    assert_eq(out, 4) assert(queue_pop_front(&q, &out));
+    assert_eq(out, 4); assert(queue_pop_front(&q, &out));
     assert_eq(out, 3);
 
     for (int i = 0; i < 20; i++)
@@ -437,12 +438,59 @@ void test_map_str() {
     assert(e != nullptr) assert_eq((int64_t)e->item, 4);
 
     e = map_find(&m, "five");
-    assert(e == nullptr)
+    assert(e == nullptr);
 
-        assert(map_remove(&m, "two"));
+    assert(map_remove(&m, "two"));
     assert(!map_remove(&m, "seven"));
 
     map_uninit(&m);
+}
+
+static int feq(float a, float b) {
+    return fabsf(a - b) < 1e-5f;
+}
+
+static int mat4_feq(mat4 a, mat4 b) {
+    return feq(a.x.x, b.x.x) && feq(a.x.y, b.x.y) && feq(a.x.z, b.x.z) && feq(a.x.w, b.x.w) &&
+           feq(a.y.x, b.y.x) && feq(a.y.y, b.y.y) && feq(a.y.z, b.y.z) && feq(a.y.w, b.y.w) &&
+           feq(a.z.x, b.z.x) && feq(a.z.y, b.z.y) && feq(a.z.z, b.z.z) && feq(a.z.w, b.z.w) &&
+           feq(a.w.x, b.w.x) && feq(a.w.y, b.w.y) && feq(a.w.z, b.w.z) && feq(a.w.w, b.w.w);
+}
+
+void test_mat4_mul_identity() {
+    mat4 A = translate((vec3){1, 2, 3});
+    assert(mat4_feq(mat4_mul(identity(), A), A));
+
+    mat4 B = translate((vec3){4, 5, 6});
+    assert(mat4_feq(mat4_mul(B, identity()), B));
+}
+
+void test_mat4_mul_associativity() {
+    mat4 A = translate((vec3){1, 2, 3});
+    mat4 B = rotate_y(45);
+    mat4 C = scale((vec3){2, 2, 2});
+
+    mat4 L = mat4_mul(mat4_mul(A, B), C);
+    mat4 R = mat4_mul(A, mat4_mul(B, C));
+
+    assert(mat4_feq(L, R));
+}
+
+void test_mat4_mul_chain() {
+    mat4 A = identity();
+    mat4_comp(&A, scale((vec3){2, 2, 2}));
+    mat4_comp(&A, rotate_x(90));
+    mat4_comp(&A, rotate_z(90));
+    mat4_comp(&A, translate((vec3){1, 2, 3}));
+
+    mat4 expected = {
+        {0, -2, 0, 0},  //
+        {0, 0, 2, 0},   //
+        {-2, 0, 0, 0},  //
+        {1, 2, 3, 1},   //
+    };
+
+    assert(mat4_feq(A, expected));
 }
 
 void test_image_png() {
@@ -487,6 +535,10 @@ int main() {
     vec_push(&tests, &test_func(test_map_insert));
     vec_push(&tests, &test_func(test_map_remove));
     vec_push(&tests, &test_func(test_map_str));
+
+    vec_push(&tests, &test_func(test_mat4_mul_identity));
+    vec_push(&tests, &test_func(test_mat4_mul_associativity));
+    vec_push(&tests, &test_func(test_mat4_mul_chain));
 
     vec_push(&tests, &test_func(test_image_png));
 
