@@ -5,15 +5,51 @@ static struct texture Face;
 static GLuint VAO;
 
 void init_vertex_data() {
+    // clang-format off
     float vertices[] = {
-        // positions             // texture coords
-        0.5,  0.5,  0.0, /**/ 1.0, 1.0,  // top right
-        0.5,  -0.5, 0.0, /**/ 1.0, 0.0,  // bottom right
-        -0.5, -0.5, 0.0, /**/ 0.0, 0.0,  // bottom left
-        -0.5, 0.5,  0.0, /**/ 0.0, 1.0   // top left
-    };
+        -0.5, -0.5, -0.5,   0.0, 0.0,
+         0.5, -0.5, -0.5,   1.0, 0.0,
+         0.5,  0.5, -0.5,   1.0, 1.0,
+         0.5,  0.5, -0.5,   1.0, 1.0,
+        -0.5,  0.5, -0.5,   0.0, 1.0,
+        -0.5, -0.5, -0.5,   0.0, 0.0,
 
-    unsigned int elements[] = {0, 1, 2, 0, 3, 2};
+        -0.5, -0.5,  0.5,   0.0, 0.0,
+         0.5, -0.5,  0.5,   1.0, 0.0,
+         0.5,  0.5,  0.5,   1.0, 1.0,
+         0.5,  0.5,  0.5,   1.0, 1.0,
+        -0.5,  0.5,  0.5,   0.0, 1.0,
+        -0.5, -0.5,  0.5,   0.0, 0.0,
+
+        -0.5,  0.5,  0.5,   1.0, 0.0,
+        -0.5,  0.5, -0.5,   1.0, 1.0,
+        -0.5, -0.5, -0.5,   0.0, 1.0,
+        -0.5, -0.5, -0.5,   0.0, 1.0,
+        -0.5, -0.5,  0.5,   0.0, 0.0,
+        -0.5,  0.5,  0.5,   1.0, 0.0,
+
+         0.5,  0.5,  0.5,   1.0, 0.0,
+         0.5,  0.5, -0.5,   1.0, 1.0,
+         0.5, -0.5, -0.5,   0.0, 1.0,
+         0.5, -0.5, -0.5,   0.0, 1.0,
+         0.5, -0.5,  0.5,   0.0, 0.0,
+         0.5,  0.5,  0.5,   1.0, 0.0,
+
+        -0.5, -0.5, -0.5,   0.0, 1.0,
+         0.5, -0.5, -0.5,   1.0, 1.0,
+         0.5, -0.5,  0.5,   1.0, 0.0,
+         0.5, -0.5,  0.5,   1.0, 0.0,
+        -0.5, -0.5,  0.5,   0.0, 0.0,
+        -0.5, -0.5, -0.5,   0.0, 1.0,
+
+        -0.5,  0.5, -0.5,   0.0, 1.0,
+         0.5,  0.5, -0.5,   1.0, 1.0,
+         0.5,  0.5,  0.5,   1.0, 0.0,
+         0.5,  0.5,  0.5,   1.0, 0.0,
+        -0.5,  0.5,  0.5,   0.0, 0.0,
+        -0.5,  0.5, -0.5,   0.0, 1.0,
+    };
+    // clang-format on
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -28,11 +64,6 @@ void init_vertex_data() {
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    GLuint EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 }
 
 void init() {
@@ -42,24 +73,35 @@ void init() {
     texture_generate_mipmaps(&Face);
 
     init_vertex_data();
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void draw() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float time = glfwGetTime();
 
     shader_activate(&Shader);
 
     texture_bind(&Face, 0);
     shader_set_int(&Shader, "texture0", 0);
 
-    mat4 transform = identity();
-    mat4_comp(&transform, translate((vec3){0.5, -0.5, 0.}));
-    mat4_comp(&transform, scale((vec3){0.5, 0.5, 0.}));
-    mat4_comp(&transform, rotate_z(45));
-    shader_set_mat4(&Shader, "transform", &transform);
+    mat4 projection = perspective(60, 8. / 6., 0.1, 100.);
+    shader_set_mat4(&Shader, "projection", &projection);
+
+    mat4 view = identity();
+    mat4_comp(&view, translate((vec3){0., 0., -3.0}));
+    shader_set_mat4(&Shader, "view", &view);
+
+    mat4 model = identity();
+    mat4_comp(&model, scale((vec3){1.2, 1.2, 1.2}));
+    mat4_comp(&model, rotate_x(45 * time));
+    mat4_comp(&model, rotate_y(22.5 * time));
+    mat4_comp(&model, rotate_z(22.25 * time));
+    shader_set_mat4(&Shader, "model", &model);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 int main() {
