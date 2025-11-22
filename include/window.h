@@ -16,6 +16,7 @@ struct key_handler {
 };
 
 typedef void (*mouse_callback)(float x, float y, float xdelta, float ydelta);
+typedef void (*scroll_callback)(float xdelta, float ydelta);
 
 struct mouse {
     mouse_callback handler;
@@ -33,6 +34,7 @@ struct window {
     callback render;
     struct vector key_handlers;
     struct mouse mouse;
+    scroll_callback scroll_handler;
 };
 
 static struct window Window = {0};
@@ -85,18 +87,6 @@ static inline void window_set_clear_color(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
 
-static inline void window_set_render_callback(callback cb) {
-    Window.render = cb;
-}
-
-static inline void window_set_key_handler(int key, callback cb, uint32_t debounce) {
-    struct key_handler* handler = vec_emplace(&Window.key_handlers);
-    handler->debounce = (double)debounce / 1000.;
-    handler->key = key;
-    handler->handler = cb;
-    handler->last_press = 0;
-}
-
 static inline void _key_handler_check_and_run(void* handler) {
     struct key_handler* p = handler;
 
@@ -128,11 +118,36 @@ static inline void _mouse_callback(GLFWwindow* window, double x, double y) {
     Window.mouse.lasty = y;
 }
 
+static inline void _scroll_callback(GLFWwindow* window, double xdelta, double ydelta) {
+    unused(window);
+
+    if (Window.scroll_handler)
+        Window.scroll_handler(xdelta, ydelta);
+}
+
+static inline void window_set_render_callback(callback cb) {
+    Window.render = cb;
+}
+
+static inline void window_set_key_handler(int key, callback cb, uint32_t debounce) {
+    struct key_handler* handler = vec_emplace(&Window.key_handlers);
+    handler->debounce = (double)debounce / 1000.;
+    handler->key = key;
+    handler->handler = cb;
+    handler->last_press = 0;
+}
+
 static inline void window_set_mouse_handler(mouse_callback cb) {
     Window.mouse.handler = cb;
     Window.mouse.init = 0;
 
     glfwSetCursorPosCallback(Window.glfw, _mouse_callback);
+}
+
+static inline void window_set_scroll_handler(scroll_callback cb) {
+    Window.scroll_handler = cb;
+
+    glfwSetScrollCallback(Window.glfw, _scroll_callback);
 }
 
 static inline void window_run() {

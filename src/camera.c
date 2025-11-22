@@ -10,6 +10,7 @@ static mat4 Projection;
 static mat4 View;
 
 static float sensitivity = 0.1;
+static float fov = 60;
 static float yaw = -90;
 static float pitch = 0;
 
@@ -86,8 +87,6 @@ void init() {
     camera_init(&Camera, (vec3){0, 0, 3}, (vec3){0, 0, -1}, (vec3){0, 1, 0});
     camera_set_speed(&Camera, 3);
 
-    Projection = perspective(60, 8. / 6., 0.1, 100.);
-
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -99,6 +98,7 @@ void draw() {
     texture_bind(&Face, 0);
     shader_set_int(&Shader, "texture0", 0);
 
+    Projection = perspective(fov, 8. / 6., 0.1, 100.);
     shader_set_mat4(&Shader, "projection", &Projection);
 
     View = camera_view(&Camera);
@@ -163,6 +163,11 @@ void mouse(float x, float y, float xdelta, float ydelta) {
     camera_set_front(&Camera, yaw, pitch);
 }
 
+void scroll(float xdelta, float ydelta) {
+    unused(xdelta);
+    fov = clamp(fov - ydelta, 10, 90);
+}
+
 int main() {
     if (!window_init(800, 600))
         return 0;
@@ -172,13 +177,14 @@ int main() {
     init();
 
     window_set_render_callback(draw);
-    window_set_mouse_handler(mouse);
     window_set_key_handler(GLFW_KEY_W, forward, 10);
     window_set_key_handler(GLFW_KEY_S, backward, 10);
     window_set_key_handler(GLFW_KEY_A, left, 10);
     window_set_key_handler(GLFW_KEY_D, right, 10);
     window_set_key_handler(GLFW_KEY_LEFT_CONTROL, up, 10);
     window_set_key_handler(GLFW_KEY_LEFT_SHIFT, down, 10);
+    window_set_mouse_handler(mouse);
+    window_set_scroll_handler(scroll);
 
     window_run();
     window_uninit();
