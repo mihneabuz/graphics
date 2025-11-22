@@ -15,30 +15,44 @@ struct key_handler {
     double last_press;
 };
 
-typedef void (*render_callback)(float time);
+typedef void (*mouse_callback)(float x, float y, float xdelta, float ydelta);
+
+struct mouse {
+    mouse_callback handler;
+    float lastx;
+    float lasty;
+    uint8_t init;
+};
 
 struct window {
-    GLFWwindow* glfw;
+    float time;
+    float delta;
     uint32_t width;
     uint32_t height;
-    render_callback render;
+    GLFWwindow* glfw;
+    callback render;
     struct vector key_handlers;
+    struct mouse mouse;
 };
 
 static struct window Window = {0};
 
-static inline void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+static inline void _framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     unused(window);
     Window.width = width;
     Window.height = height;
+    Window.mouse.init = 0;
     glViewport(0, 0, width, height);
 }
 
 static inline int window_init(uint32_t width, uint32_t height) {
-    Window.glfw = nullptr;
+    Window.time = 0;
+    Window.delta = 0;
     Window.width = width;
     Window.height = height;
+    Window.glfw = nullptr;
     Window.render = nullptr;
+    Window.mouse = (struct mouse){0};
     vec_init(&Window.key_handlers, sizeof(struct key_handler));
 
     glfwInit();
@@ -60,7 +74,7 @@ static inline int window_init(uint32_t width, uint32_t height) {
     }
 
     glViewport(0, 0, width, height);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, _framebuffer_size_callback);
 
     Window.glfw = window;
 
@@ -71,7 +85,7 @@ static inline void window_set_clear_color(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
 
-static inline void window_set_render_callback(render_callback cb) {
+static inline void window_set_render_callback(callback cb) {
     Window.render = cb;
 }
 
@@ -83,7 +97,7 @@ static inline void window_set_key_handler(int key, callback cb, uint32_t debounc
     handler->last_press = 0;
 }
 
-static inline void key_handler_check_and_run(void* handler) {
+static inline void _key_handler_check_and_run(void* handler) {
     struct key_handler* p = handler;
 
     if (glfwGetKey(Window.glfw, p->key) == GLFW_PRESS) {
@@ -95,19 +109,57 @@ static inline void key_handler_check_and_run(void* handler) {
     }
 }
 
+static inline void _mouse_callback(GLFWwindow* window, double x, double y) {
+    unused(window);
+
+    if (!Window.mouse.init) {
+        Window.mouse.lastx = x;
+        Window.mouse.lasty = y;
+        Window.mouse.init = 1;
+    }
+
+    float xdelta = x - Window.mouse.lastx;
+    float ydelta = y - Window.mouse.lasty;
+
+    if (Window.mouse.handler)
+        Window.mouse.handler(x, y, xdelta, ydelta);
+
+    Window.mouse.lastx = x;
+    Window.mouse.lasty = y;
+}
+
+static inline void window_set_mouse_handler(mouse_callback cb) {
+    Window.mouse.handler = cb;
+    Window.mouse.init = 0;
+
+    glfwSetCursorPosCallback(Window.glfw, _mouse_callback);
+}
+
 static inline void window_run() {
     while (!glfwWindowShouldClose(Window.glfw)) {
         if (glfwGetKey(Window.glfw, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(Window.glfw, true);
 
-        vec_for_each(&Window.key_handlers, key_handler_check_and_run);
+        float time = glfwGetTime();
+        Window.delta = time - Window.time;
+        Window.time = time;
+
+        vec_for_each(&Window.key_handlers, _key_handler_check_and_run);
 
         if (Window.render)
-            Window.render(glfwGetTime());
+            Window.render();
 
         glfwSwapBuffers(Window.glfw);
         glfwPollEvents();
     }
+}
+
+static inline float window_time() {
+    return Window.time;
+}
+
+static inline float window_delta() {
+    return Window.delta;
 }
 
 static inline void window_uninit() {

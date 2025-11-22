@@ -77,7 +77,7 @@ void init() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void draw(float time) {
+void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader_activate(&Shader);
@@ -94,9 +94,9 @@ void draw(float time) {
 
     mat4 model = identity();
     mat4_comp(&model, scale((vec3){1.2, 1.2, 1.2}));
-    mat4_comp(&model, rotate_x(45 * time));
-    mat4_comp(&model, rotate_y(22.5 * time));
-    mat4_comp(&model, rotate_z(22.25 * time));
+    mat4_comp(&model, rotate_x(45 * window_time()));
+    mat4_comp(&model, rotate_y(22.5 * window_time()));
+    mat4_comp(&model, rotate_z(22.25 * window_time()));
     shader_set_mat4(&Shader, "model", &model);
 
     glBindVertexArray(VAO);

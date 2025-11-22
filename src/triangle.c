@@ -4,7 +4,6 @@ static struct shader Shader;
 static GLuint TriangleVAO;
 
 static float speed = 1.0;
-static float last_draw = 0.0;
 static float accumulator = 0.0;
 
 void init_vertex_data() {
@@ -30,12 +29,10 @@ void init_vertex_data() {
     glEnableVertexAttribArray(1);
 }
 
-void draw(float time) {
+void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    float elapsed = last_draw - time;
-    accumulator += elapsed * speed;
-    last_draw = time;
+    accumulator += window_delta() * speed;
 
     shader_activate(&Shader);
     float xOffset = sin(accumulator) / 2.4;
