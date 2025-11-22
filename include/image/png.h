@@ -253,12 +253,12 @@ static inline void png_load(struct png_parser_state* state, struct image* img) {
     if (img_size == 0)
         return;
 
-    img->data = malloc(img_size);
+    img->data = calloc(img_size, 1);
     if (!img->data)
         panic("png_load: failed to allocate memory");
 
     uint32_t inflated_size = img_size + img->height;
-    uint8_t* inflated_data = malloc(inflated_size);
+    uint8_t* inflated_data = calloc(inflated_size, 1);
     if (!inflated_data)
         panic("png_load: failed to allocate memory");
 
