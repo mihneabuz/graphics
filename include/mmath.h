@@ -12,6 +12,16 @@ static inline float degrees(float radians) {
     return radians * 180. / acos(1.);
 }
 
+static inline float clamp(float value, float min, float max) {
+    if (value < min)
+        value = min;
+
+    if (value > max)
+        value = max;
+
+    return value;
+}
+
 typedef struct vec3 {
     float x, y, z;
 } vec3;
@@ -36,6 +46,22 @@ static inline vec3 vec3_new(float value) {
     };
 }
 
+static inline vec3 vec3_neg(vec3 v) {
+    return (vec3){
+        .x = -v.x,
+        .y = -v.y,
+        .z = -v.z,
+    };
+}
+
+static inline vec3 vec3_scale(vec3 v, float value) {
+    return (vec3){
+        .x = v.x * value,
+        .y = v.y * value,
+        .z = v.z * value,
+    };
+}
+
 static inline vec3 vec3_add(vec3 a, vec3 b) {
     return (vec3){
         .x = a.x + b.x,
@@ -49,6 +75,19 @@ static inline vec3 vec3_sub(vec3 a, vec3 b) {
         .x = a.x - b.x,
         .y = a.y - b.y,
         .z = a.z - b.z,
+    };
+}
+
+static inline vec3 vec3_norm(vec3 v) {
+    float len = sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+    return (vec3){v.x / len, v.y / len, v.z / len};
+}
+
+static inline vec3 vec3_cross(vec3 a, vec3 b) {
+    return (vec3){
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x,
     };
 }
 
@@ -240,6 +279,23 @@ static inline vec4 mat4_apply(mat4 m, vec4 v) {
         .z = v.x * m.z.x + v.y * m.z.y + v.z * m.z.z + v.w * m.z.w,
         .w = v.x * m.w.x + v.y * m.w.y + v.z * m.w.z + v.w * m.w.w,
     };
+}
+
+static inline mat4 look_at(vec3 pos, vec3 target, vec3 up) {
+    vec3 d = vec3_norm(vec3_sub(pos, target));
+    vec3 r = vec3_norm(vec3_cross(up, d));
+    vec3 u = vec3_cross(d, r);
+
+    mat4 a = {
+        {r.x, u.x, d.x, 0},
+        {r.y, u.y, d.y, 0},
+        {r.z, u.z, d.z, 0},
+        {0, 0, 0, 1},
+    };
+
+    mat4 b = translate(vec3_neg(pos));
+
+    return mat4_mul(a, b);
 }
 
 #endif
