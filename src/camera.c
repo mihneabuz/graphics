@@ -1,18 +1,9 @@
 #include "graphics.h"
-#include "mmath.h"
 
+static struct fly_camera Camera;
 static struct shader Shader;
 static struct texture Face;
 static GLuint VAO;
-
-struct camera Camera;
-static mat4 Projection;
-static mat4 View;
-
-static float sensitivity = 0.1;
-static float fov = 60;
-static float yaw = -90;
-static float pitch = 0;
 
 void init_vertex_data() {
     // clang-format off
@@ -84,8 +75,8 @@ void init() {
 
     init_vertex_data();
 
-    camera_init(&Camera, (vec3){0, 0, 3}, (vec3){0, 0, -1}, (vec3){0, 1, 0});
-    camera_set_speed(&Camera, 3);
+    fly_camera_init(&Camera, (vec3){0, 0, 3});
+    Camera.inner.speed = 3;
 
     glEnable(GL_DEPTH_TEST);
 }
@@ -98,11 +89,11 @@ void draw() {
     texture_bind(&Face, 0);
     shader_set_int(&Shader, "texture0", 0);
 
-    Projection = perspective(fov, 8. / 6., 0.1, 100.);
-    shader_set_mat4(&Shader, "projection", &Projection);
+    mat4 projection = camera_projection(&Camera.inner, window_aspect_ratio());
+    shader_set_mat4(&Shader, "projection", &projection);
 
-    View = camera_view(&Camera);
-    shader_set_mat4(&Shader, "view", &View);
+    mat4 view = camera_view(&Camera.inner);
+    shader_set_mat4(&Shader, "view", &view);
 
     glBindVertexArray(VAO);
 
@@ -133,39 +124,37 @@ void draw() {
 }
 
 void forward() {
-    camera_move_forward(&Camera, window_delta());
+    camera_move_forward(&Camera.inner, window_delta());
 }
 
 void backward() {
-    camera_move_backward(&Camera, window_delta());
+    camera_move_backward(&Camera.inner, window_delta());
 }
 
 void left() {
-    camera_move_left(&Camera, window_delta());
+    camera_move_left(&Camera.inner, window_delta());
 }
 
 void right() {
-    camera_move_right(&Camera, window_delta());
+    camera_move_right(&Camera.inner, window_delta());
 }
 
 void up() {
-    camera_move_up(&Camera, window_delta());
+    camera_move_up(&Camera.inner, window_delta());
 }
 
 void down() {
-    camera_move_down(&Camera, window_delta());
+    camera_move_down(&Camera.inner, window_delta());
 }
 
 void mouse(float x, float y, float xdelta, float ydelta) {
     unused(x) unused(y);
-    yaw = yaw + xdelta * sensitivity;
-    pitch = clamp(pitch - ydelta * sensitivity, -60, 60);
-    camera_set_front(&Camera, yaw, pitch);
+    fly_camera_update(&Camera, xdelta, ydelta);
 }
 
 void scroll(float xdelta, float ydelta) {
     unused(xdelta);
-    fov = clamp(fov - ydelta, 10, 90);
+    Camera.inner.fov = clamp(Camera.inner.fov - ydelta, 10, 90);
 }
 
 int main() {

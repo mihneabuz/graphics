@@ -77,6 +77,7 @@ static inline int window_init(uint32_t width, uint32_t height) {
 
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, _framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     Window.glfw = window;
 
@@ -167,6 +168,10 @@ static inline void window_run() {
         glfwSwapBuffers(Window.glfw);
         glfwPollEvents();
     }
+}
+
+static inline float window_aspect_ratio() {
+    return (float)Window.width / (float)Window.height;
 }
 
 static inline float window_time() {
