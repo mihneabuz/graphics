@@ -35,6 +35,7 @@ struct window {
     struct vector key_handlers;
     struct mouse mouse;
     scroll_callback scroll_handler;
+    GLbitfield clear;
 };
 
 static struct window Window = {0};
@@ -55,6 +56,7 @@ static inline int window_init(uint32_t width, uint32_t height) {
     Window.glfw = nullptr;
     Window.render = nullptr;
     Window.mouse = (struct mouse){0};
+    Window.clear = GL_COLOR_BUFFER_BIT;
     vec_init(&Window.key_handlers, sizeof(struct key_handler));
 
     glfwInit();
@@ -149,6 +151,16 @@ static inline void window_set_scroll_handler(scroll_callback cb) {
     Window.scroll_handler = cb;
 
     glfwSetScrollCallback(Window.glfw, _scroll_callback);
+}
+
+static inline void window_enable_depth_testing() {
+    glEnable(GL_DEPTH_TEST);
+
+    Window.clear |= GL_DEPTH_BUFFER_BIT;
+}
+
+static inline void window_clear() {
+    glClear(Window.clear);
 }
 
 static inline void window_run() {
