@@ -7,15 +7,12 @@ static struct shader FloorShader;
 static uint32_t Floor;
 static uint32_t Cube;
 
+static vec3 LightPos = {1.4, 4, 1.0};
+static vec3 LightColor = {1.0, 1.0, 1.0};
+
 void init_floor_texture() {
     struct texture texture;
 
-    // struct image img;
-    // image_load("smol.png", &img);
-    // exit(0);
-    // image_write(&img, "wtf.ppm", "ppm");
-
-    // texture_load_image(&texture, "smol.png");
     texture_load_image(&texture, "assets/checkered.png");
     texture_generate_mipmaps(&texture);
 
@@ -27,18 +24,42 @@ void init_floor_texture() {
 
 void init_cube_buffers() {
     const float cube_vertices[] = {
-        -0.5, -0.5, -0.5, 0.5,  -0.5, -0.5, 0.5,  0.5,  -0.5,  //
-        0.5,  0.5,  -0.5, -0.5, 0.5,  -0.5, -0.5, -0.5, -0.5,  //
-        -0.5, -0.5, 0.5,  0.5,  -0.5, 0.5,  0.5,  0.5,  0.5,   //
-        0.5,  0.5,  0.5,  -0.5, 0.5,  0.5,  -0.5, -0.5, 0.5,   //
-        -0.5, 0.5,  0.5,  -0.5, 0.5,  -0.5, -0.5, -0.5, -0.5,  //
-        -0.5, -0.5, -0.5, -0.5, -0.5, 0.5,  -0.5, 0.5,  0.5,   //
-        0.5,  0.5,  0.5,  0.5,  0.5,  -0.5, 0.5,  -0.5, -0.5,  //
-        0.5,  -0.5, -0.5, 0.5,  -0.5, 0.5,  0.5,  0.5,  0.5,   //
-        -0.5, -0.5, -0.5, 0.5,  -0.5, -0.5, 0.5,  -0.5, 0.5,   //
-        0.5,  -0.5, 0.5,  -0.5, -0.5, 0.5,  -0.5, -0.5, -0.5,  //
-        -0.5, 0.5,  -0.5, 0.5,  0.5,  -0.5, 0.5,  0.5,  0.5,   //
-        0.5,  0.5,  0.5,  -0.5, 0.5,  0.5,  -0.5, 0.5,  -0.5,  //
+        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,  //
+        -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,   //
+        0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,   //
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,   //
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,   //
+        -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,   //
+        -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,   //
+        -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,   //
+        -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,   //
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,   //
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,   //
+        -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,   //
+        -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,   //
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,   //
+        0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,   //
+        0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,   //
+        0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,   //
+        0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,   //
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,   //
+        -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,   //
+        0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,   //
+        0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,   //
+        0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,   //
+        -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,   //
+        -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,   //
+        -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,   //
+        0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,   //
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,   //
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,   //
+        -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,   //
+        -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,   //
     };
 
     glGenVertexArrays(1, &Cube);
@@ -49,8 +70,11 @@ void init_cube_buffers() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 }
 
 void init_floor_buffers() {
@@ -96,6 +120,9 @@ void draw_floor() {
     mat4 model = scale((vec3){1000, 0, 1000});
     shader_set_mat4(&FloorShader, "model", &model);
 
+    shader_set_vec3(&FloorShader, "lightPos", LightPos);
+    shader_set_vec3(&FloorShader, "lightColor", LightColor);
+
     glBindVertexArray(Floor);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -116,7 +143,7 @@ void draw_light() {
 
     mat4 model = identity();
     mat4_comp(&model, scale((vec3){0.2, 0.2, 0.2}));
-    mat4_comp(&model, translate((vec3){0, 4, 0}));
+    mat4_comp(&model, translate(LightPos));
     shader_set_mat4(&LightShader, "model", &model);
 
     draw_cube();
@@ -135,8 +162,10 @@ void draw_object() {
     mat4_comp(&model, translate((vec3){0, 0.5, 0}));
     shader_set_mat4(&ObjectShader, "model", &model);
 
-    shader_set_vec3(&ObjectShader, "objectColor", 1.0, 0.5, 0.31);
-    shader_set_vec3(&ObjectShader, "lightColor", 1.0, 1.0, 1.0);
+    shader_set_vec3(&ObjectShader, "viewPos", camera_pos(DebugCamera));
+    shader_set_vec3(&ObjectShader, "lightPos", LightPos);
+    shader_set_vec3(&ObjectShader, "lightColor", LightColor);
+    shader_set_vec3(&ObjectShader, "objectColor", (vec3){1.0, 0.5, 0.31});
 
     draw_cube();
 }

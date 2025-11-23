@@ -10,8 +10,8 @@ struct camera* DebugCamera = &DebugFlyCamera.inner;
 
 void debug_camera_init(vec3 pos) {
     fly_camera_init(&DebugFlyCamera, pos);
-    DebugFlyCamera.sensitivity = 0.3;
-    DebugFlyCamera.inner.speed = 5;
+    DebugFlyCamera.sensitivity = 0.2;
+    DebugFlyCamera.inner.speed = 10;
     camera_set_y_bounds(DebugCamera, 0.2, INFINITY);
 }
 
