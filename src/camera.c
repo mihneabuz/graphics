@@ -116,7 +116,6 @@ void draw() {
         mat4_comp(&model, rotate_y(6. * i));
         mat4_comp(&model, rotate_z(10. * i));
         mat4_comp(&model, translate(positions[i]));
-
         shader_set_mat4(&Shader, "model", &model);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);

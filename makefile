@@ -25,8 +25,9 @@ TRIANGLE_BIN = $(BIN_DIR)/triangle
 TEXTURE_BIN = $(BIN_DIR)/texture
 TRANSFORM_BIN = $(BIN_DIR)/transform
 CAMERA_BIN = $(BIN_DIR)/camera
+LIGHTING_BIN = $(BIN_DIR)/lighting
 
-BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN)
+BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN) $(LIGTHING_BIN)
 
 # ================ COMMANDS ================
 
@@ -81,6 +82,15 @@ run_camera: $(CAMERA_BIN)
 
 debug_camera: $(CAMERA_BIN)
 	gdb ./$(CAMERA_BIN)
+
+$(LIGHTING_BIN): $(SRC_DIR)/lighting.c | $(BIN_DIR) $(INCLUDE_LOADER)
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+
+run_lighting: $(LIGHTING_BIN)
+	./$(LIGHTING_BIN)
+
+debug_lighting: $(LIGHTING_BIN)
+	gdb ./$(LIGHTING_BIN)
 
 # ================ TESTS ================
 
