@@ -207,25 +207,25 @@ static inline void png_unfilter_line(uint8_t* out,
     uint8_t* scanline = line + 1;
 
     switch (filter) {
-        case 0:
+        case 0:  // None
             memcpy(out, scanline, length);
             break;
 
-        case 1:
+        case 1:  // Sub
             for (uint32_t i = 0; i < length; i++) {
                 uint8_t a = i >= bpp ? out[i - bpp] : 0;
                 out[i] = scanline[i] + a;
             }
             break;
 
-        case 2:
+        case 2:  // Up
             for (uint32_t i = 0; i < length; i++) {
                 uint8_t b = prev ? prev[i] : 0;
                 out[i] = scanline[i] + b;
             }
             break;
 
-        case 3:
+        case 3:  // Average
             for (uint32_t i = 0; i < length; i++) {
                 uint8_t a = i >= bpp ? out[i - bpp] : 0;
                 uint8_t b = prev ? prev[i] : 0;
@@ -233,9 +233,9 @@ static inline void png_unfilter_line(uint8_t* out,
             }
             break;
 
-        case 4:
+        case 4:  // Paeth
             for (uint32_t i = 0; i < length; i++) {
-                uint8_t a = i > bpp ? out[i - bpp] : 0;
+                uint8_t a = i >= bpp ? out[i - bpp] : 0;
                 uint8_t b = prev ? prev[i] : 0;
                 uint8_t c = (prev && i >= bpp) ? prev[i - bpp] : 0;
                 out[i] = scanline[i] + png_paeth(a, b, c);
