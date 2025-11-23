@@ -130,20 +130,34 @@ def generate_proc(proc: Proc):
 
     arg_format_str = ", ".join([formatter(arg[0]) for arg in proc["args"]])
     arg_format_vars = f", {arg_syms}" if arg_format_str else ""
+    debug = True if proc["name"] != "glGetError" else False
 
     if (proc["ret"] == "void"):
-        print("#ifdef GL_DEBUG")
-        print(f"    fprintf(stderr, \"{proc["name"]}({arg_format_str})\\n\"{arg_format_vars});")
-        print("#endif")
+        if (debug):
+            print("#ifdef GL_DEBUG")
+            print(f"    fprintf(stderr, \"{proc["name"]}({arg_format_str})\\n\"{arg_format_vars});")
+            print("#endif")
+
         print(f"    proc_{proc["name"]}({arg_syms});")
+
+        if (debug):
+            print("#ifdef GL_DEBUG")
+            print(f"    glTryPrintError();")
+            print("#endif")
     else:
-        print("#ifdef GL_DEBUG")
-        print(f"    fprintf(stderr, \"{proc["name"]}({arg_format_str})\"{arg_format_vars});")
-        print("#endif")
+        if (debug):
+            print("#ifdef GL_DEBUG")
+            print(f"    fprintf(stderr, \"{proc["name"]}({arg_format_str})\"{arg_format_vars});")
+            print("#endif")
+
         print(f"    {proc["ret"]} ret = proc_{proc["name"]}({arg_syms});")
-        print("#ifdef GL_DEBUG")
-        print(f"    fprintf(stderr, \" = {formatter(proc["ret"])}\\n\", ret);")
-        print("#endif")
+
+        if (debug):
+            print("#ifdef GL_DEBUG")
+            print(f"    fprintf(stderr, \" = {formatter(proc["ret"])}\\n\", ret);")
+            print(f"    glTryPrintError();")
+            print("#endif")
+
         print(f"    return ret;")
     print("}")
     print()

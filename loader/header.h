@@ -8,6 +8,7 @@
 #endif
 
 #include <stdint.h>
+#include <stdio.h>
 
 typedef void GLvoid;
 typedef char GLchar;
@@ -27,7 +28,7 @@ typedef double GLdouble;
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
 typedef unsigned int GLbitfield;
-typedef struct __GLsync *GLsync;
+typedef struct __GLsync* GLsync;
 
 #define GL_DEPTH_BUFFER_BIT 0x00000100
 #define GL_STENCIL_BUFFER_BIT 0x00000400
@@ -848,5 +849,33 @@ typedef struct __GLsync *GLsync;
 #define GL_TIMESTAMP 0x8E28
 #define GL_INT_2_10_10_10_REV 0x8D9F
 
-typedef void* (*ProcLoader)(const char* name);
+GLenum glGetError();
 
+static inline char* glErrorStr(GLenum error) {
+    switch (error) {
+        case (1280):
+            return "Invalid enum";
+        case (1281):
+            return "Invalid value";
+        case (1282):
+            return "Invalid operation";
+        case (1283):
+            return "Stack overflow";
+        case (1284):
+            return "Stack underflow";
+        case (1285):
+            return "Out of memroy";
+        case (1286):
+            return "Invalid framebuffer operation";
+    };
+
+    return nullptr;
+}
+
+static inline void glTryPrintError() {
+    GLenum code = glGetError();
+    if (code != 0)
+        fprintf(stderr, "Error: %s\n", glErrorStr(code));
+}
+
+typedef void* (*ProcLoader)(const char* name);
