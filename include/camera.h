@@ -6,9 +6,11 @@
 struct camera {
     float fov;
     float speed;
+
     vec3 pos;
-    vec3 front;
-    vec3 up;
+    float miny, maxy;
+
+    vec3 front, up;
 };
 
 static inline void camera_init(struct camera* cam, vec3 pos, vec3 front, vec3 up) {
@@ -17,6 +19,15 @@ static inline void camera_init(struct camera* cam, vec3 pos, vec3 front, vec3 up
     cam->up = up;
     cam->speed = 1;
     cam->fov = 60;
+}
+
+static inline void camera_set_y_bounds(struct camera* cam, float min, float max) {
+    cam->miny = min;
+    cam->maxy = max;
+}
+
+static inline void camera_clamp(struct camera* cam) {
+    cam->pos.y = clamp(cam->pos.y, cam->miny, cam->maxy);
 }
 
 static inline vec3 camera_pos(struct camera* cam) {
@@ -58,31 +69,37 @@ static inline mat4 camera_projection(struct camera* cam, float aspect_ratio) {
 static inline void camera_move_forward(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_add(cam->pos, vec3_scale(cam->front, speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_move_backward(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_sub(cam->pos, vec3_scale(cam->front, speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_move_left(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_sub(cam->pos, vec3_scale(camera_right(cam), speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_move_right(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_add(cam->pos, vec3_scale(camera_right(cam), speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_move_up(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_add(cam->pos, vec3_scale(cam->up, speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_move_down(struct camera* cam, float delta) {
     float speed = cam->speed * delta;
     cam->pos = vec3_sub(cam->pos, vec3_scale(cam->up, speed));
+    camera_clamp(cam);
 }
 
 static inline void camera_set_front(struct camera* cam, float yaw, float pitch) {

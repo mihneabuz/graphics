@@ -12,6 +12,7 @@ void debug_camera_init(vec3 pos) {
     fly_camera_init(&DebugFlyCamera, pos);
     DebugFlyCamera.sensitivity = 0.3;
     DebugFlyCamera.inner.speed = 5;
+    camera_set_y_bounds(DebugCamera, 0.2, INFINITY);
 }
 
 void debug_camera_forward() {
