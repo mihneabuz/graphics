@@ -1,8 +1,6 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <stdio.h>
-
 #include "gl_loader.h"
 #include "mmath.h"
 #include "util.h"
@@ -13,10 +11,8 @@ struct shader {
 
 static inline GLuint compile_shader(const char* path, GLuint type) {
     const char* source = read_file(path);
-    if (!source) {
-        printf("compile_shader failed:\ncould not read file %s\n", path);
-        return 0;
-    }
+    if (!source)
+        panic("compile_shader:\nfailed to read file %s\n", path);
 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
@@ -29,9 +25,7 @@ static inline GLuint compile_shader(const char* path, GLuint type) {
     if (!success) {
         char infoLog[1024];
         glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-        printf("compile_shader failed:\n%s\n", infoLog);
-        glDeleteShader(shader);
-        return 0;
+        panic("compile_shader:\nfailed to compile %s\n%s", path, infoLog);
     }
 
     return shader;
@@ -49,35 +43,23 @@ static inline GLuint link_shaders(GLuint vertex, GLuint fragment) {
     if (!success) {
         char infoLog[1024];
         glGetProgramInfoLog(program, 1024, nullptr, infoLog);
-        printf("program linking failed:\n%s\n", infoLog);
-        glDeleteProgram(program);
-        return 0;
+        panic("program linking failed:\n%s\n", infoLog);
     }
 
     return program;
 }
 
-static inline int shader_init(struct shader* shader, const char* vertex, const char* fragment) {
+static inline void shader_init(struct shader* shader, const char* vertex, const char* fragment) {
     shader->program = 0;
 
     GLuint vertex_shader = compile_shader(vertex, GL_VERTEX_SHADER);
-    if (!vertex_shader)
-        return 0;
-
     GLuint fragment_shader = compile_shader(fragment, GL_FRAGMENT_SHADER);
-    if (!fragment_shader)
-        return 0;
-
     GLuint program = link_shaders(vertex_shader, fragment_shader);
 
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
-    if (!program)
-        return 0;
-
     shader->program = program;
-    return 1;
 }
 
 static inline void shader_activate(struct shader* shader) {
@@ -96,12 +78,8 @@ static inline void shader_set_float(struct shader* shader, const char* name, flo
     glUniform1f(glGetUniformLocation(shader->program, name), value);
 }
 
-static inline void shader_set_vec3(struct shader* shader,
-                                   const char* name,
-                                   float x,
-                                   float y,
-                                   float z) {
-    glUniform3f(glGetUniformLocation(shader->program, name), x, y, z);
+static inline void shader_set_vec3(struct shader* shader, const char* name, vec3 vec) {
+    glUniform3f(glGetUniformLocation(shader->program, name), vec.x, vec.y, vec.z);
 }
 
 static inline void shader_set_mat3(struct shader* shader, const char* name, mat3* mat) {

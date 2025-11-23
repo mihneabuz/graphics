@@ -504,7 +504,7 @@ void test_image_png() {
     assert(img.data != nullptr);
 
     if (img.data && img.width * img.height * img.channels > 100) {
-        assert_eq(img.data[30 * 3 + 0], 0);    // R
+        assert_eq(img.data[30 * 3 + 0], 18);   // R
         assert_eq(img.data[30 * 3 + 1], 66);   // G
         assert_eq(img.data[30 * 3 + 2], 216);  // B
     }

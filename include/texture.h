@@ -11,17 +11,17 @@ struct texture {
     GLuint id;
 };
 
-static inline int texture_load_image(struct texture* tex, const char* path) {
+static inline void texture_load_image(struct texture* tex, const char* path) {
+    tex->width = 0;
+    tex->height = 0;
+    tex->channels = 0;
+    tex->id = 0;
+
     struct image img;
 
     int ret = image_load(path, &img);
-    if (!ret) {
-        tex->width = 0;
-        tex->height = 0;
-        tex->channels = 0;
-        tex->id = 0;
-        return 0;
-    }
+    if (!ret)
+        panic("texture_load_image: failed to load image");
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -32,7 +32,7 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    int format;
+    int format = 0;
     switch (img.channels) {
         case 3:
             format = GL_RGB;
@@ -45,7 +45,7 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
         case 2:
         default:
             image_uninit(&img);
-            return 0;
+            panic("texture_load_image: image has invalid format channels %d", img.channels);
     };
 
     glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,
@@ -57,8 +57,6 @@ static inline int texture_load_image(struct texture* tex, const char* path) {
     tex->id = texture;
 
     image_uninit(&img);
-
-    return 1;
 }
 
 static inline void texture_bind(struct texture* tex, int index) {
