@@ -5,6 +5,7 @@
 
 #include "gl_loader.h"
 #include "image.h"
+#include "mmath.h"
 
 struct texture {
     uint32_t width, height, channels;
@@ -57,6 +58,24 @@ static inline void texture_load_image(struct texture* tex, const char* path) {
     tex->id = texture;
 
     image_uninit(&img);
+}
+
+static inline void texture_create_fallback(struct texture* tex, vec4 color) {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, &color);
+
+    tex->width = 1;
+    tex->height = 1;
+    tex->channels = 4;
+    tex->id = texture;
 }
 
 static inline void texture_bind(struct texture* tex, int index) {

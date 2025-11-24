@@ -25,6 +25,12 @@ struct material {
     float shininess;
 };
 
+struct material_map {
+    GLuint diffuse_sampler;
+    GLuint specular_sampler;
+    float shininess;
+};
+
 static inline GLuint compile_shader(const char* path, GLuint type) {
     const char* source = read_file(path);
     if (!source)
@@ -126,7 +132,29 @@ static inline void shader_set_material(struct shader* shader,
     string_pop(&temp, 9);
 
     string_append(&temp, ".shininess", 10);
-    shader_set_float(shader, "material.shininess", material->shininess);
+    shader_set_float(shader, string_ptr(&temp), material->shininess);
+    string_pop(&temp, 10);
+
+    string_uninit(&temp);
+}
+
+static inline void shader_set_material_map(struct shader* shader,
+                                           const char* name,
+                                           struct material_map* material) {
+    struct string temp;
+    string_init(&temp);
+    string_append(&temp, name, strlen(name));
+
+    string_append(&temp, ".diffuse", 8);
+    shader_set_int(shader, string_ptr(&temp), material->diffuse_sampler);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".specular", 9);
+    shader_set_int(shader, string_ptr(&temp), material->specular_sampler);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".shininess", 10);
+    shader_set_float(shader, string_ptr(&temp), material->shininess);
     string_pop(&temp, 10);
 
     string_uninit(&temp);
@@ -154,6 +182,15 @@ static inline void shader_set_light(struct shader* shader, const char* name, str
     string_pop(&temp, 9);
 
     string_uninit(&temp);
+}
+
+static inline void shader_set_transform(struct shader* shader,
+                                        mat4* model,
+                                        mat4* view,
+                                        mat4* projection) {
+    shader_set_mat4(shader, "model", model);
+    shader_set_mat4(shader, "view", view);
+    shader_set_mat4(shader, "projection", projection);
 }
 
 static inline void shader_uninit(struct shader* shader) {
