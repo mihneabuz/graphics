@@ -3,10 +3,26 @@
 
 #include "gl_loader.h"
 #include "mmath.h"
+#include "mstring.h"
 #include "util.h"
 
 struct shader {
     GLuint program;
+};
+
+struct light {
+    vec3 pos;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
 };
 
 static inline GLuint compile_shader(const char* path, GLuint type) {
@@ -88,6 +104,56 @@ static inline void shader_set_mat3(struct shader* shader, const char* name, mat3
 
 static inline void shader_set_mat4(struct shader* shader, const char* name, mat4* mat) {
     glUniformMatrix4fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, (float*)mat);
+}
+
+static inline void shader_set_material(struct shader* shader,
+                                       const char* name,
+                                       struct material* material) {
+    struct string temp;
+    string_init(&temp);
+    string_append(&temp, name, strlen(name));
+
+    string_append(&temp, ".ambient", 8);
+    shader_set_vec3(shader, string_ptr(&temp), material->ambient);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".diffuse", 8);
+    shader_set_vec3(shader, string_ptr(&temp), material->diffuse);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".specular", 9);
+    shader_set_vec3(shader, string_ptr(&temp), material->specular);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".shininess", 10);
+    shader_set_float(shader, "material.shininess", material->shininess);
+    string_pop(&temp, 10);
+
+    string_uninit(&temp);
+}
+
+static inline void shader_set_light(struct shader* shader, const char* name, struct light* light) {
+    struct string temp;
+    string_init(&temp);
+    string_append(&temp, name, strlen(name));
+
+    string_append(&temp, ".pos", 4);
+    shader_set_vec3(shader, string_ptr(&temp), light->pos);
+    string_pop(&temp, 4);
+
+    string_append(&temp, ".ambient", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->ambient);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".diffuse", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->diffuse);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".specular", 9);
+    shader_set_vec3(shader, string_ptr(&temp), light->specular);
+    string_pop(&temp, 9);
+
+    string_uninit(&temp);
 }
 
 static inline void shader_uninit(struct shader* shader) {
