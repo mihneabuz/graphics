@@ -5,10 +5,10 @@ in vec3 fragPos;
 out vec4 fragColor;
 
 uniform vec3 lightPos;
-uniform vec3 lightColor;
 uniform sampler2D texture0;
 
 void main() {
+    vec3 lightColor = vec3(1.0);
     vec3 fragNormal = vec3(0.0, 1.0, 0.0);
 
     float ambientStrength = 0.1;
