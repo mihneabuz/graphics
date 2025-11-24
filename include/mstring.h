@@ -18,7 +18,8 @@ static inline char* string_ptr(struct string* str) {
 }
 
 static inline uint32_t string_len(struct string* str) {
-    return str->inner.size;
+    uint32_t size = str->inner.size;
+    return size == 0 ? 0 : size - 1;
 }
 
 static inline struct vector* string_as_vec(struct string* str) {
@@ -38,7 +39,7 @@ static inline void string_strip_terminator(struct string* str) {
 
 static inline void string_push(struct string* str, char c) {
     string_strip_terminator(str);
-    vec_push(&str->inner, &c);
+    *(char*)vec_emplace(&str->inner) = c;
     string_add_terminator(str);
 }
 

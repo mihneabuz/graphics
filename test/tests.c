@@ -2,6 +2,7 @@
 #include "list.h"
 #include "map.h"
 #include "mmath.h"
+#include "mstring.h"
 #include "queue.h"
 #include "util.h"
 #include "vector.h"
@@ -447,6 +448,37 @@ void test_map_str() {
     map_uninit(&m);
 }
 
+void test_string_append() {
+    struct string s;
+    string_init(&s);
+
+    string_append(&s, "Hello", 5);
+    string_push(&s, ' ');
+    string_append(&s, "World", 5);
+    string_push(&s, '!');
+
+    assert_eq(string_len(&s), 12);
+    assert(strcmp(string_ptr(&s), "Hello World!") == 0);
+
+    string_uninit(&s);
+}
+
+void test_string_pop() {
+    struct string s;
+    string_init(&s);
+
+    string_append(&s, "Hello blahblahblah", 18);
+    string_pop(&s, 4);
+    string_pop(&s, 4);
+    string_pop(&s, 4);
+    string_append(&s, "World!", 6);
+
+    assert_eq(string_len(&s), 12);
+    assert(strcmp(string_ptr(&s), "Hello World!") == 0);
+
+    string_uninit(&s);
+}
+
 static int feq(float a, float b) {
     return fabsf(a - b) < 1e-5f;
 }
@@ -538,6 +570,9 @@ int main() {
     vec_push(&tests, &test_func(test_map_insert));
     vec_push(&tests, &test_func(test_map_remove));
     vec_push(&tests, &test_func(test_map_str));
+
+    vec_push(&tests, &test_func(test_string_append));
+    vec_push(&tests, &test_func(test_string_pop));
 
     vec_push(&tests, &test_func(test_mat4_mul_identity));
     vec_push(&tests, &test_func(test_mat4_mul_associativity));
