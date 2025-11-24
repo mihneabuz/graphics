@@ -22,9 +22,6 @@ static inline void vec_init(struct vector* vec, const uint32_t item_size) {
 }
 
 static inline void vec_realloc(struct vector* vec, const uint32_t new_capacity) {
-    if (new_capacity <= vec->capacity)
-        return;
-
     void* new_data = realloc(vec->data, new_capacity * vec->item_size);
     if (!new_data)
         panic("vec_realloc: failed to allocate memory");
@@ -93,8 +90,8 @@ static inline void vec_extend(struct vector* vec, const void* from, uint32_t cou
     if (!from || !count)
         return;
 
-    if (count > vec->capacity - vec->size)
-        vec_realloc(vec, next_power_of_2(count + vec->size));
+    if (vec->size + count > vec->capacity)
+        vec_realloc(vec, next_power_of_2(vec->size + count));
 
     void* start = (uint8_t*)vec->data + vec->size * vec->item_size;
     memcpy(start, from, count * vec->item_size);
