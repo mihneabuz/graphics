@@ -31,6 +31,10 @@ struct Light {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 uniform Light light;
@@ -41,7 +45,7 @@ void main() {
     vec3 viewDir = normalize(viewPos - fragPos);
 
     float dist = length(light.pos - fragPos);
-    float attenuation = 1.0 / (1.0 + 0.01 * dist + 0.003 * dist * dist);
+    float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * dist * dist);
 
     vec3 ambientColor = useTexture ? texture(materialMap.diffuse, fragTexCoords).rgb : material.ambient;
     vec3 diffuseColor = useTexture ? texture(materialMap.diffuse, fragTexCoords).rgb : material.diffuse;

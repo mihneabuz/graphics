@@ -13,11 +13,16 @@ static struct texture Black;
 static uint32_t Floor;
 static uint32_t Cube;
 
-static struct light Light = {
-    .pos = {0.0, 2.0, 1.0},
+static struct point_light Light = {
+    .pos = {0.0, 3.0, 1.0},
+
     .ambient = {0.1, 0.1, 0.1},
     .diffuse = {0.6, 0.6, 0.6},
     .specular = {1, 1, 1},
+
+    .constant = 1.0,
+    .linear = 0.09,
+    .quadratic = 0.032,
 };
 
 static struct material SimpleCube = {
@@ -96,7 +101,9 @@ void init_floor_buffers() {
 void draw_floor() {
     shader_activate(&ObjectShader);
 
-    mat4 model = scale((vec3){1000, 0, 1000});
+    mat4 model = identity();
+    mat4_comp(&model, scale((vec3){1000, 1, 1000}));
+    mat4_comp(&model, translate((vec3){0, 1, 0}));
     shader_set_transform(&ObjectShader, &model, &View, &Projection);
 
     texture_bind(&Checkered, 0);
@@ -105,7 +112,7 @@ void draw_floor() {
     FloorMat.specular_sampler = 1;
 
     shader_set_vec3(&ObjectShader, "viewPos", camera_pos(DebugCamera));
-    shader_set_light(&ObjectShader, "light", &Light);
+    shader_set_point_light(&ObjectShader, "light", &Light);
     shader_set_material_map(&ObjectShader, "materialMap", &FloorMat);
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_TRUE);
     shader_set_int(&ObjectShader, "useTexture", GL_TRUE);
@@ -133,11 +140,11 @@ void draw_light() {
 void draw_simple_object() {
     shader_activate(&ObjectShader);
 
-    mat4 model = translate((vec3){-1.5, 0.5, 0});
+    mat4 model = translate((vec3){-1.5, 1.5, 0});
     shader_set_transform(&ObjectShader, &model, &View, &Projection);
 
     shader_set_vec3(&ObjectShader, "viewPos", camera_pos(DebugCamera));
-    shader_set_light(&ObjectShader, "light", &Light);
+    shader_set_point_light(&ObjectShader, "light", &Light);
     shader_set_material(&ObjectShader, "material", &SimpleCube);
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_FALSE);
     shader_set_int(&ObjectShader, "useTexture", GL_FALSE);
@@ -148,7 +155,7 @@ void draw_simple_object() {
 void draw_textured_object() {
     shader_activate(&ObjectShader);
 
-    mat4 model = translate((vec3){1.5, 0.5, 0});
+    mat4 model = translate((vec3){1.5, 1.5, 0});
     shader_set_transform(&ObjectShader, &model, &View, &Projection);
 
     texture_bind(&Crate, 2);
@@ -157,7 +164,7 @@ void draw_textured_object() {
     TexturedCube.specular_sampler = 3;
 
     shader_set_vec3(&ObjectShader, "viewPos", camera_pos(DebugCamera));
-    shader_set_light(&ObjectShader, "light", &Light);
+    shader_set_point_light(&ObjectShader, "light", &Light);
     shader_set_material_map(&ObjectShader, "materialMap", &TexturedCube);
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_FALSE);
     shader_set_int(&ObjectShader, "useTexture", GL_TRUE);
@@ -224,7 +231,7 @@ int main() {
     init_cube_buffers();
     init_floor_buffers();
 
-    debug_camera_init((vec3){0, 2, 5});
+    debug_camera_init((vec3){0, 3, 5});
     window_register_debug_camera();
 
     window_enable_depth_testing();

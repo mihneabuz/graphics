@@ -10,12 +10,24 @@ struct shader {
     GLuint program;
 };
 
-struct light {
+struct dir_light {
+    vec3 dir;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct point_light {
     vec3 pos;
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 struct material {
@@ -160,13 +172,53 @@ static inline void shader_set_material_map(struct shader* shader,
     string_uninit(&temp);
 }
 
-static inline void shader_set_light(struct shader* shader, const char* name, struct light* light) {
+static inline void shader_set_point_light(struct shader* shader,
+                                          const char* name,
+                                          struct point_light* light) {
     struct string temp;
     string_init(&temp);
     string_append(&temp, name, strlen(name));
 
     string_append(&temp, ".pos", 4);
     shader_set_vec3(shader, string_ptr(&temp), light->pos);
+    string_pop(&temp, 4);
+
+    string_append(&temp, ".ambient", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->ambient);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".diffuse", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->diffuse);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".specular", 9);
+    shader_set_vec3(shader, string_ptr(&temp), light->specular);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".constant", 9);
+    shader_set_float(shader, string_ptr(&temp), light->constant);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".linear", 7);
+    shader_set_float(shader, string_ptr(&temp), light->linear);
+    string_pop(&temp, 7);
+
+    string_append(&temp, ".quadratic", 10);
+    shader_set_float(shader, string_ptr(&temp), light->quadratic);
+    string_pop(&temp, 10);
+
+    string_uninit(&temp);
+}
+
+static inline void shader_set_directional_light(struct shader* shader,
+                                                const char* name,
+                                                struct dir_light* light) {
+    struct string temp;
+    string_init(&temp);
+    string_append(&temp, name, strlen(name));
+
+    string_append(&temp, ".dir", 4);
+    shader_set_vec3(shader, string_ptr(&temp), light->dir);
     string_pop(&temp, 4);
 
     string_append(&temp, ".ambient", 8);
