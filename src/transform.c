@@ -5,64 +5,18 @@ static struct texture Face;
 static GLuint VAO;
 
 void init_vertex_data() {
-    // clang-format off
-    float vertices[] = {
-        -0.5, -0.5, -0.5,   0.0, 0.0,
-         0.5, -0.5, -0.5,   1.0, 0.0,
-         0.5,  0.5, -0.5,   1.0, 1.0,
-         0.5,  0.5, -0.5,   1.0, 1.0,
-        -0.5,  0.5, -0.5,   0.0, 1.0,
-        -0.5, -0.5, -0.5,   0.0, 0.0,
-
-        -0.5, -0.5,  0.5,   0.0, 0.0,
-         0.5, -0.5,  0.5,   1.0, 0.0,
-         0.5,  0.5,  0.5,   1.0, 1.0,
-         0.5,  0.5,  0.5,   1.0, 1.0,
-        -0.5,  0.5,  0.5,   0.0, 1.0,
-        -0.5, -0.5,  0.5,   0.0, 0.0,
-
-        -0.5,  0.5,  0.5,   1.0, 0.0,
-        -0.5,  0.5, -0.5,   1.0, 1.0,
-        -0.5, -0.5, -0.5,   0.0, 1.0,
-        -0.5, -0.5, -0.5,   0.0, 1.0,
-        -0.5, -0.5,  0.5,   0.0, 0.0,
-        -0.5,  0.5,  0.5,   1.0, 0.0,
-
-         0.5,  0.5,  0.5,   1.0, 0.0,
-         0.5,  0.5, -0.5,   1.0, 1.0,
-         0.5, -0.5, -0.5,   0.0, 1.0,
-         0.5, -0.5, -0.5,   0.0, 1.0,
-         0.5, -0.5,  0.5,   0.0, 0.0,
-         0.5,  0.5,  0.5,   1.0, 0.0,
-
-        -0.5, -0.5, -0.5,   0.0, 1.0,
-         0.5, -0.5, -0.5,   1.0, 1.0,
-         0.5, -0.5,  0.5,   1.0, 0.0,
-         0.5, -0.5,  0.5,   1.0, 0.0,
-        -0.5, -0.5,  0.5,   0.0, 0.0,
-        -0.5, -0.5, -0.5,   0.0, 1.0,
-
-        -0.5,  0.5, -0.5,   0.0, 1.0,
-         0.5,  0.5, -0.5,   1.0, 1.0,
-         0.5,  0.5,  0.5,   1.0, 0.0,
-         0.5,  0.5,  0.5,   1.0, 0.0,
-        -0.5,  0.5,  0.5,   0.0, 0.0,
-        -0.5,  0.5, -0.5,   0.0, 1.0,
-    };
-    // clang-format on
-
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cube_stride, cube_positions_offset);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, cube_stride, cube_tex_coords_offset);
     glEnableVertexAttribArray(1);
 }
 
@@ -100,7 +54,7 @@ void draw() {
     shader_set_mat4(&Shader, "model", &model);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
 }
 
 int main() {

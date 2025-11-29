@@ -26,8 +26,9 @@ TEXTURE_BIN = $(BIN_DIR)/texture
 TRANSFORM_BIN = $(BIN_DIR)/transform
 CAMERA_BIN = $(BIN_DIR)/camera
 LIGHT1_BIN = $(BIN_DIR)/light1
+LIGHT2_BIN = $(BIN_DIR)/light2
 
-BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN) $(LIGHT1_BIN)
+BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN) $(LIGHT1_BIN) $(LIGHT2_BIN)
 
 # ================ COMMANDS ================
 
@@ -91,6 +92,15 @@ run_light1: $(LIGHT1_BIN)
 
 debug_light1: $(LIGHT1_BIN)
 	gdb ./$(LIGHT1_BIN)
+
+$(LIGHT2_BIN): $(SRC_DIR)/light2.c | $(BIN_DIR) $(INCLUDE_LOADER)
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+
+run_light2: $(LIGHT2_BIN)
+	./$(LIGHT2_BIN)
+
+debug_light2: $(LIGHT2_BIN)
+	gdb ./$(LIGHT2_BIN)
 
 # ================ TESTS ================
 
