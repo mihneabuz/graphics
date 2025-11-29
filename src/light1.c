@@ -253,8 +253,8 @@ int main() {
     if (!window_init(800, 600))
         return 1;
 
-    shader_init(&ObjectShader, "shaders/simple_vs.glsl", "shaders/object_fs.glsl");
-    shader_init(&LightShader, "shaders/simple_vs.glsl", "shaders/light_fs.glsl");
+    shader_init(&ObjectShader, "shaders/simple_vs.glsl", "shaders/light1_fs.glsl");
+    shader_init(&LightShader, "shaders/simple_vs.glsl", "shaders/white_fs.glsl");
 
     texture_load_image(&Checkered, "assets/checkered.png");
     texture_generate_mipmaps(&Checkered);
