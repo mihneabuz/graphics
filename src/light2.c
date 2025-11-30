@@ -6,7 +6,7 @@ static struct shader LightShader;
 static struct texture Crate;
 static struct texture CrateSpecular;
 
-static uint32_t Cube;
+static struct mesh Cube;
 
 struct dir_light Sun = {
     .dir = {-0.2, -1.0, -0.3},
@@ -75,23 +75,10 @@ struct spot_light Flashlight = {
     .outerCutoff = 0,
 };
 
-void init_cube_buffers() {
-    glGenVertexArrays(1, &Cube);
-    glBindVertexArray(Cube);
-
-    uint32_t VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cube_stride, cube_positions_offset);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, cube_stride, cube_normals_offset);
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, cube_stride, cube_tex_coords_offset);
-    glEnableVertexAttribArray(2);
+void init_cube_mesh() {
+    mesh_allocate(&Cube, cube_vertex_count, 0, 0);
+    mesh_copy_vertices(&Cube, cube_vertices);
+    mesh_generate(&Cube);
 }
 
 void draw_crates() {
@@ -137,12 +124,11 @@ void draw_crates() {
         {-1.3, 1.0, -1.5},    //
     };
 
-    glBindVertexArray(Cube);
     for (int i = 0; i < 10; i++) {
         mat4 model = translate(positions[i]);
         shader_set_mat4(&CrateShader, "model", &model);
 
-        glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
+        mesh_draw(&Cube);
     }
 }
 
@@ -155,7 +141,6 @@ void draw_lights() {
     mat4 view = camera_view(DebugCamera);
     shader_set_mat4(&CrateShader, "view", &view);
 
-    glBindVertexArray(Cube);
     for (int i = 0; i < 4; i++) {
         mat4 model = identity();
         mat4_comp(&model, scale(vec3_new(0.2)));
@@ -164,7 +149,7 @@ void draw_lights() {
 
         shader_set_vec3(&LightShader, "solidColor", Lights[i].specular);
 
-        glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
+        mesh_draw(&Cube);
     }
 }
 
@@ -185,7 +170,7 @@ int main() {
     texture_load_image(&Crate, "assets/crate.png");
     texture_load_image(&CrateSpecular, "assets/crate_specular.png");
 
-    init_cube_buffers();
+    init_cube_mesh();
 
     debug_camera_init((vec3){0, 0.2, 5});
     window_register_debug_camera();

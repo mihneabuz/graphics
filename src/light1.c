@@ -8,8 +8,8 @@ static struct texture CrateSpecular;
 static struct texture Checkered;
 static struct texture Black;
 
-static uint32_t Floor;
-static uint32_t Cube;
+static struct mesh Floor;
+static struct mesh Cube;
 
 static struct point_light Light = {
     .pos = {0.0, 3.0, 1.0},
@@ -41,31 +41,18 @@ static struct material_map FloorMat = {
 static mat4 View;
 static mat4 Projection;
 
-void init_cube_buffers() {
-    glGenVertexArrays(1, &Cube);
-    glBindVertexArray(Cube);
-
-    uint32_t VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cube_stride, cube_positions_offset);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, cube_stride, cube_normals_offset);
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, cube_stride, cube_tex_coords_offset);
-    glEnableVertexAttribArray(2);
+void init_cube_mesh() {
+    mesh_allocate(&Cube, cube_vertex_count, 0, 0);
+    mesh_copy_vertices(&Cube, cube_vertices);
+    mesh_generate(&Cube);
 }
 
-void init_floor_buffers() {
-    const float floor_vertices[] = {
-        -0.5, 0, 0.5,   //
-        0.5,  0, 0.5,   //
-        -0.5, 0, -0.5,  //
-        0.5,  0, -0.5,  //
+void init_floor_mesh() {
+    const struct vertex floor_vertices[] = {
+        {{-0.5, 0, 0.5}, {0, 1, 0}, {0, 0}},   //
+        {{0.5, 0, 0.5}, {0, 1, 0}, {0, 0}},    //
+        {{-0.5, 0, -0.5}, {0, 1, 0}, {0, 0}},  //
+        {{0.5, 0, -0.5}, {0, 1, 0}, {0, 0}},   //
     };
 
     const uint32_t floor_indices[] = {
@@ -73,27 +60,10 @@ void init_floor_buffers() {
         1, 2, 3,  //
     };
 
-    glGenVertexArrays(1, &Floor);
-    glBindVertexArray(Floor);
-
-    uint32_t buffers[2] = {0, 0};
-    glGenBuffers(2, buffers);
-
-    uint32_t* VBO = &buffers[0];
-    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(floor_vertices), floor_vertices, GL_STATIC_DRAW);
-
-    uint32_t* EBO = &buffers[1];
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floor_indices), floor_indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttrib3f(1, 0, 1.0, 0);
-    glDisableVertexAttribArray(1);
-
-    glDisableVertexAttribArray(2);
+    mesh_allocate(&Floor, 4, 6, 0);
+    mesh_copy_vertices(&Floor, (char*)floor_vertices);
+    mesh_copy_indices(&Floor, (char*)floor_indices);
+    mesh_generate(&Floor);
 }
 
 void draw_floor() {
@@ -115,13 +85,7 @@ void draw_floor() {
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_TRUE);
     shader_set_int(&ObjectShader, "useTexture", GL_TRUE);
 
-    glBindVertexArray(Floor);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-void draw_cube() {
-    glBindVertexArray(Cube);
-    glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
+    mesh_draw(&Floor);
 }
 
 void draw_light() {
@@ -134,7 +98,7 @@ void draw_light() {
 
     shader_set_vec3(&LightShader, "solidColor", vec3_new(1));
 
-    draw_cube();
+    mesh_draw(&Cube);
 }
 
 void draw_simple_object() {
@@ -149,7 +113,7 @@ void draw_simple_object() {
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_FALSE);
     shader_set_int(&ObjectShader, "useTexture", GL_FALSE);
 
-    draw_cube();
+    mesh_draw(&Cube);
 }
 
 void draw_textured_object() {
@@ -169,7 +133,7 @@ void draw_textured_object() {
     shader_set_int(&ObjectShader, "useGeneratedCoords", GL_FALSE);
     shader_set_int(&ObjectShader, "useTexture", GL_TRUE);
 
-    draw_cube();
+    mesh_draw(&Cube);
 }
 
 void draw() {
@@ -221,8 +185,8 @@ int main() {
     texture_load_image(&Checkered, "assets/checkered.png");
     texture_create_fallback(&Black, (vec4){0, 0, 0, 0});
 
-    init_cube_buffers();
-    init_floor_buffers();
+    init_cube_mesh();
+    init_floor_mesh();
 
     debug_camera_init((vec3){0, 3, 5});
     window_register_debug_camera();
