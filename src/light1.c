@@ -1,6 +1,4 @@
 #include "graphics.h"
-#include "shader.h"
-#include "texture.h"
 
 static struct shader ObjectShader;
 static struct shader LightShader;

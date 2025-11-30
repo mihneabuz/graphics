@@ -1,6 +1,4 @@
 #include "graphics.h"
-#include "shader.h"
-#include "texture.h"
 
 static struct shader Shader;
 
@@ -9,8 +7,59 @@ static struct texture CrateSpecular;
 
 static uint32_t Cube;
 
-static mat4 View;
-static mat4 Projection;
+struct dir_light Sun = {
+    .dir = {-0.2, -1.0, -0.3},
+    .ambient = {0.06, 0.06, 0.04},
+    .diffuse = {0.4, 0.4, 0.3},
+    .specular = {0.5, 0.5, 0.4},
+};
+
+struct point_light Lights[] = {
+    {
+        .pos = {0.7, 0.2, 2.0},
+
+        .ambient = {0.05, 0.05, 0.05},
+        .diffuse = {0.8, 0.8, 0.8},
+        .specular = {1.0, 1.0, 1.0},
+
+        .constant = 1,
+        .linear = 0.09,
+        .quadratic = 0.032,
+    },
+    {
+        .pos = {2.3, -3.3, -4.0},
+
+        .ambient = {0.05, 0.05, 0.05},
+        .diffuse = {0.8, 0.8, 0.8},
+        .specular = {1.0, 1.0, 1.0},
+
+        .constant = 1,
+        .linear = 0.09,
+        .quadratic = 0.032,
+    },
+    {
+        .pos = {-4.0, 2.0, -12.0},
+
+        .ambient = {0.05, 0.05, 0.05},
+        .diffuse = {0.8, 0.8, 0.8},
+        .specular = {1.0, 1.0, 1.0},
+
+        .constant = 1,
+        .linear = 0.09,
+        .quadratic = 0.032,
+    },
+    {
+        .pos = {0.0, 0.0, -3.0},
+
+        .ambient = {0.05, 0.05, 0.05},
+        .diffuse = {0.8, 0.8, 0.8},
+        .specular = {1.0, 1.0, 1.0},
+
+        .constant = 1,
+        .linear = 0.09,
+        .quadratic = 0.032,
+    },
+};
 
 void init_cube_buffers() {
     glGenVertexArrays(1, &Cube);
@@ -31,18 +80,29 @@ void init_cube_buffers() {
     glEnableVertexAttribArray(2);
 }
 
-void draw_cube() {
-    glBindVertexArray(Cube);
-    glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
-}
-
-void draw() {
-    window_clear();
-
+void draw_crates() {
     shader_activate(&Shader);
 
-    Projection = camera_projection(DebugCamera, window_aspect_ratio());
-    View = camera_view(DebugCamera);
+    mat4 projection = camera_projection(DebugCamera, window_aspect_ratio());
+    shader_set_mat4(&Shader, "projection", &projection);
+
+    mat4 view = camera_view(DebugCamera);
+    shader_set_mat4(&Shader, "view", &view);
+
+    shader_set_directional_light(&Shader, "dirLight", &Sun);
+    shader_set_point_light(&Shader, "pointLights[0]", &Lights[0]);
+    shader_set_point_light(&Shader, "pointLights[1]", &Lights[1]);
+    shader_set_point_light(&Shader, "pointLights[2]", &Lights[2]);
+    shader_set_point_light(&Shader, "pointLights[3]", &Lights[3]);
+
+    texture_bind(&Crate, 0);
+    texture_bind(&CrateSpecular, 1);
+    struct material_map material = {
+        .diffuse_sampler = 0,
+        .specular_sampler = 1,
+        .shininess = 32,
+    };
+    shader_set_material_map(&Shader, "material", &material);
 
     vec3 positions[10] = {
         {0.0, 0.0, 0.0},      //
@@ -57,22 +117,20 @@ void draw() {
         {-1.3, 1.0, -1.5},    //
     };
 
-    texture_bind(&Crate, 0);
-    texture_bind(&CrateSpecular, 1);
-    struct material_map material = {
-        .diffuse_sampler = 0,
-        .specular_sampler = 1,
-        .shininess = 32,
-    };
-    shader_set_material_map(&Shader, "material", &material);
-
+    glBindVertexArray(Cube);
     for (int i = 0; i < 10; i++) {
         mat4 model = identity();
         mat4_comp(&model, translate(positions[i]));
-        shader_set_transform(&Shader, &model, &View, &Projection);
+        shader_set_mat4(&Shader, "model", &model);
 
-        draw_cube();
+        glDrawArrays(GL_TRIANGLES, 0, cube_vertex_count);
     }
+}
+
+void draw() {
+    window_clear();
+
+    draw_crates();
 }
 
 int main() {
