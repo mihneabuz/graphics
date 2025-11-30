@@ -30,10 +30,16 @@ static inline void vec_realloc(struct vector* vec, const uint32_t new_capacity) 
     vec->capacity = new_capacity;
 }
 
-static inline void vec_resize(struct vector* vec, const uint32_t new_size) {
-    if (new_size > vec->capacity)
-        vec_realloc(vec, next_power_of_2(new_size));
+static inline void vec_ensure_capacity(struct vector* vec, const uint32_t needed) {
+    if (needed > vec->capacity) {
+        uint32_t new_capacity = next_power_of_2(needed);
+        new_capacity = new_capacity < 8 ? 8 : new_capacity;
+        vec_realloc(vec, new_capacity);
+    }
+}
 
+static inline void vec_resize(struct vector* vec, const uint32_t new_size) {
+    vec_ensure_capacity(vec, new_size);
     vec->size = new_size;
 }
 
@@ -70,10 +76,7 @@ static inline int vec_set(struct vector* vec, const uint32_t idx, const void* it
 }
 
 static inline void* vec_emplace(struct vector* vec) {
-    if (vec->size == vec->capacity) {
-        uint32_t new_capacity = vec->capacity == 0 ? 8 : next_power_of_2(vec->capacity + 1);
-        vec_realloc(vec, new_capacity);
-    }
+    vec_ensure_capacity(vec, vec->size + 1);
 
     void* slot = (uint8_t*)vec->data + vec->size * vec->item_size;
     vec->size += 1;
@@ -90,8 +93,7 @@ static inline void vec_extend(struct vector* vec, const void* from, uint32_t cou
     if (!from || !count)
         return;
 
-    if (vec->size + count > vec->capacity)
-        vec_realloc(vec, next_power_of_2(vec->size + count));
+    vec_ensure_capacity(vec, vec->size + count);
 
     void* start = (uint8_t*)vec->data + vec->size * vec->item_size;
     memcpy(start, from, count * vec->item_size);
