@@ -132,6 +132,8 @@ void draw_light() {
     mat4_comp(&model, translate(Light.pos));
     shader_set_transform(&ObjectShader, &model, &View, &Projection);
 
+    shader_set_vec3(&LightShader, "solidColor", vec3_new(1));
+
     draw_cube();
 }
 
@@ -212,7 +214,7 @@ int main() {
         return 1;
 
     shader_init(&ObjectShader, "shaders/simple_vs.glsl", "shaders/light1_fs.glsl");
-    shader_init(&LightShader, "shaders/simple_vs.glsl", "shaders/white_fs.glsl");
+    shader_init(&LightShader, "shaders/simple_vs.glsl", "shaders/solid_fs.glsl");
 
     texture_load_image(&Checkered, "assets/checkered.png");
     texture_generate_mipmaps(&Checkered);

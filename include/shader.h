@@ -30,6 +30,22 @@ struct point_light {
     float quadratic;
 };
 
+struct spot_light {
+    vec3 pos;
+    vec3 dir;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    float cutoff;
+    float outerCutoff;
+};
+
 struct material {
     vec3 ambient;
     vec3 diffuse;
@@ -232,6 +248,56 @@ static inline void shader_set_directional_light(struct shader* shader,
     string_append(&temp, ".specular", 9);
     shader_set_vec3(shader, string_ptr(&temp), light->specular);
     string_pop(&temp, 9);
+
+    string_uninit(&temp);
+}
+
+static inline void shader_set_spot_light(struct shader* shader,
+                                         const char* name,
+                                         struct spot_light* light) {
+    struct string temp;
+    string_init(&temp);
+    string_append(&temp, name, strlen(name));
+
+    string_append(&temp, ".pos", 4);
+    shader_set_vec3(shader, string_ptr(&temp), light->pos);
+    string_pop(&temp, 4);
+
+    string_append(&temp, ".dir", 4);
+    shader_set_vec3(shader, string_ptr(&temp), light->dir);
+    string_pop(&temp, 4);
+
+    string_append(&temp, ".ambient", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->ambient);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".diffuse", 8);
+    shader_set_vec3(shader, string_ptr(&temp), light->diffuse);
+    string_pop(&temp, 8);
+
+    string_append(&temp, ".specular", 9);
+    shader_set_vec3(shader, string_ptr(&temp), light->specular);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".constant", 9);
+    shader_set_float(shader, string_ptr(&temp), light->constant);
+    string_pop(&temp, 9);
+
+    string_append(&temp, ".linear", 7);
+    shader_set_float(shader, string_ptr(&temp), light->linear);
+    string_pop(&temp, 7);
+
+    string_append(&temp, ".quadratic", 10);
+    shader_set_float(shader, string_ptr(&temp), light->quadratic);
+    string_pop(&temp, 10);
+
+    string_append(&temp, ".cutoff", 7);
+    shader_set_float(shader, string_ptr(&temp), light->cutoff);
+    string_pop(&temp, 7);
+
+    string_append(&temp, ".outerCutoff", 12);
+    shader_set_float(shader, string_ptr(&temp), light->outerCutoff);
+    string_pop(&temp, 12);
 
     string_uninit(&temp);
 }
