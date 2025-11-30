@@ -41,10 +41,7 @@ void init() {
     shader_init(&Shader, "shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
 
     texture_load_image(&Wall, "assets/wall.png");
-    texture_generate_mipmaps(&Wall);
-
     texture_load_image(&Face, "assets/awesomeface.png");
-    texture_generate_mipmaps(&Face);
 
     init_vertex_data();
 }

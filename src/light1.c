@@ -216,17 +216,10 @@ int main() {
     shader_init(&ObjectShader, "shaders/simple_vs.glsl", "shaders/light1_fs.glsl");
     shader_init(&LightShader, "shaders/simple_vs.glsl", "shaders/solid_fs.glsl");
 
-    texture_load_image(&Checkered, "assets/checkered.png");
-    texture_generate_mipmaps(&Checkered);
-
-    texture_create_fallback(&Black, (vec4){0, 0, 0, 0});
-    texture_generate_mipmaps(&Black);
-
     texture_load_image(&Crate, "assets/crate.png");
-    texture_generate_mipmaps(&Crate);
-
     texture_load_image(&CrateSpecular, "assets/crate_specular.png");
-    texture_generate_mipmaps(&CrateSpecular);
+    texture_load_image(&Checkered, "assets/checkered.png");
+    texture_create_fallback(&Black, (vec4){0, 0, 0, 0});
 
     init_cube_buffers();
     init_floor_buffers();

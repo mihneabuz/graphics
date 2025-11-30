@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #define GL_LOADER
 #include "gl_loader.h"
 

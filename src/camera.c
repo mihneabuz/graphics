@@ -25,7 +25,6 @@ void init() {
     shader_init(&Shader, "shaders/transform_vs.glsl", "shaders/transform_fs.glsl");
 
     texture_load_image(&Face, "assets/awesomeface.png");
-    texture_generate_mipmaps(&Face);
 
     init_vertex_data();
 

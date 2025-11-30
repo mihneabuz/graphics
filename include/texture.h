@@ -52,6 +52,8 @@ static inline void texture_load_image(struct texture* tex, const char* path) {
     glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE,
                  img.data);
 
+    glGenerateMipmap(GL_TEXTURE_2D);
+
     tex->width = img.width;
     tex->height = img.height;
     tex->channels = img.channels;
@@ -72,6 +74,8 @@ static inline void texture_create_fallback(struct texture* tex, vec4 color) {
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, &color);
 
+    glGenerateMipmap(GL_TEXTURE_2D);
+
     tex->width = 1;
     tex->height = 1;
     tex->channels = 4;
@@ -88,11 +92,6 @@ static inline void texture_bind(struct texture* tex, int index) {
 
 static inline void texture_unbind() {
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-static inline void texture_generate_mipmaps(struct texture* tex) {
-    glBindTexture(GL_TEXTURE_2D, tex->id);
-    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 static inline void texture_uninit(struct texture* tex) {

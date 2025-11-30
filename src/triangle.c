@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include "shader.h"
 
 static struct shader Shader;
 static GLuint TriangleVAO;
