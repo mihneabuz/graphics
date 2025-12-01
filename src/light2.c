@@ -76,7 +76,7 @@ struct spot_light Flashlight = {
 };
 
 void init_cube_mesh() {
-    mesh_allocate(&Cube, cube_vertex_count, 0, 0);
+    mesh_allocate(&Cube, cube_vertex_count, 0);
     mesh_copy_vertices(&Cube, cube_vertices);
     mesh_generate(&Cube);
 }

@@ -1,19 +1,17 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <stddef.h>
+#include <string.h>
+
 #include "gl_loader.h"
 #include "mmath.h"
-#include "texture.h"
 #include "util.h"
 
 struct vertex {
     vec3 pos;
     vec3 normal;
     vec2 tex_coords;
-};
-
-struct texture_pair {
-    struct texture diffuse, specular;
 };
 
 struct mesh {
@@ -25,28 +23,19 @@ struct mesh {
     uint32_t* indices;
     uint32_t index_count;
 
-    struct texture_pair* textures;
-    uint32_t texture_count;
-
     GLuint VAO, VBO, EBO;
 };
 
-static inline void mesh_allocate(struct mesh* m,
-                                 uint32_t vertex_count,
-                                 uint32_t index_count,
-                                 uint32_t texture_count) {
+static inline void mesh_allocate(struct mesh* m, uint32_t vertex_count, uint32_t index_count) {
     m->vertex_count = vertex_count;
     m->index_count = index_count;
-    m->texture_count = texture_count;
-    m->data = malloc(vertex_count * sizeof(struct vertex) + index_count * sizeof(uint32_t) +
-                     texture_count * sizeof(struct texture));
+    m->data = malloc(vertex_count * sizeof(struct vertex) + index_count * sizeof(uint32_t));
 
     if (!m->data)
         panic("mesh_allocate: failed to allocate memory");
 
     m->vertices = (struct vertex*)m->data;
     m->indices = (uint32_t*)(m->vertices + vertex_count);
-    m->textures = (struct texture_pair*)(m->indices + index_count);
 }
 
 static inline void mesh_copy_vertices(struct mesh* m, void* data) {
@@ -104,8 +93,9 @@ static inline void mesh_uninit(struct mesh* m) {
 
     m->data = nullptr;
     m->vertices = nullptr;
+    m->vertex_count = 0;
     m->indices = nullptr;
-    m->textures = nullptr;
+    m->index_count = 0;
 }
 
 #endif

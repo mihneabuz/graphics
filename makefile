@@ -1,6 +1,6 @@
 CC = gcc
 INCLUDE = -Iinclude
-LIBS = -lglfw -lGL -lm -lz
+LIBS = -lm -lz -lGL -lglfw -lassimp
 FLAGS = -Wall -Wextra -std=c23 $(INCLUDE)
 
 MODE ?= debug
@@ -27,8 +27,9 @@ TRANSFORM_BIN = $(BIN_DIR)/transform
 CAMERA_BIN = $(BIN_DIR)/camera
 LIGHT1_BIN = $(BIN_DIR)/light1
 LIGHT2_BIN = $(BIN_DIR)/light2
+MODEL_BIN = $(BIN_DIR)/model
 
-BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN) $(LIGHT1_BIN) $(LIGHT2_BIN)
+BINS = $(TRIANGLE_BIN) $(TEXTURE_BIN) $(TRANSFORM_BIN) $(CAMERA_BIN) $(LIGHT1_BIN) $(LIGHT2_BIN) $(MODEL_BIN)
 
 # ================ COMMANDS ================
 
@@ -54,17 +55,11 @@ $(TRIANGLE_BIN): $(SRC_DIR)/triangle.c | $(BIN_DIR) $(INCLUDE_LOADER)
 run_triangle: $(TRIANGLE_BIN)
 	./$(TRIANGLE_BIN)
 
-debug_triangle: $(TRIANGLE_BIN)
-	gdb ./$(TRIANGLE_BIN)
-
 $(TEXTURE_BIN): $(SRC_DIR)/texture.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_texture: $(TEXTURE_BIN)
 	./$(TEXTURE_BIN)
-
-debug_texture: $(TEXTURE_BIN)
-	gdb ./$(TEXTURE_BIN)
 
 $(TRANSFORM_BIN): $(SRC_DIR)/transform.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
@@ -72,17 +67,11 @@ $(TRANSFORM_BIN): $(SRC_DIR)/transform.c | $(BIN_DIR) $(INCLUDE_LOADER)
 run_transform: $(TRANSFORM_BIN)
 	./$(TRANSFORM_BIN)
 
-debug_transform: $(TRANSFORM_BIN)
-	gdb ./$(TRANSFORM_BIN)
-
 $(CAMERA_BIN): $(SRC_DIR)/camera.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_camera: $(CAMERA_BIN)
 	./$(CAMERA_BIN)
-
-debug_camera: $(CAMERA_BIN)
-	gdb ./$(CAMERA_BIN)
 
 $(LIGHT1_BIN): $(SRC_DIR)/light1.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
@@ -90,17 +79,17 @@ $(LIGHT1_BIN): $(SRC_DIR)/light1.c | $(BIN_DIR) $(INCLUDE_LOADER)
 run_light1: $(LIGHT1_BIN)
 	./$(LIGHT1_BIN)
 
-debug_light1: $(LIGHT1_BIN)
-	gdb ./$(LIGHT1_BIN)
-
 $(LIGHT2_BIN): $(SRC_DIR)/light2.c | $(BIN_DIR) $(INCLUDE_LOADER)
 	$(CC) $(FLAGS) $(LIBS) $^ -o $@
 
 run_light2: $(LIGHT2_BIN)
 	./$(LIGHT2_BIN)
 
-debug_light2: $(LIGHT2_BIN)
-	gdb ./$(LIGHT2_BIN)
+$(MODEL_BIN): $(SRC_DIR)/model.c | $(BIN_DIR) $(INCLUDE_LOADER)
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+
+run_model: $(MODEL_BIN)
+	./$(MODEL_BIN)
 
 # ================ TESTS ================
 

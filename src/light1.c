@@ -42,7 +42,7 @@ static mat4 View;
 static mat4 Projection;
 
 void init_cube_mesh() {
-    mesh_allocate(&Cube, cube_vertex_count, 0, 0);
+    mesh_allocate(&Cube, cube_vertex_count, 0);
     mesh_copy_vertices(&Cube, cube_vertices);
     mesh_generate(&Cube);
 }
@@ -60,7 +60,7 @@ void init_floor_mesh() {
         1, 2, 3,  //
     };
 
-    mesh_allocate(&Floor, 4, 6, 0);
+    mesh_allocate(&Floor, 4, 6);
     mesh_copy_vertices(&Floor, (char*)floor_vertices);
     mesh_copy_indices(&Floor, (char*)floor_indices);
     mesh_generate(&Floor);

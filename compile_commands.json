@@ -64,6 +64,78 @@
       "-g",
       "-O0",
       "-o",
+      "bin/camera",
+      "src/camera.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/camera.c",
+    "output": "/home/mihnea/personal/graphics/bin/camera"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c23",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "bin/light1",
+      "src/light1.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/light1.c",
+    "output": "/home/mihnea/personal/graphics/bin/light1"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c23",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "bin/light2",
+      "src/light2.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/light2.c",
+    "output": "/home/mihnea/personal/graphics/bin/light2"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c23",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
+      "bin/model",
+      "src/model.c"
+    ],
+    "directory": "/home/mihnea/personal/graphics",
+    "file": "/home/mihnea/personal/graphics/src/model.c",
+    "output": "/home/mihnea/personal/graphics/bin/model"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c23",
+      "-Iinclude",
+      "-g",
+      "-O0",
+      "-o",
       "test/tests",
       "test/tests.c"
     ],

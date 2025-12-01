@@ -154,6 +154,18 @@ static inline void vec_clone(const struct vector* src, struct vector* dest) {
     }
 }
 
+static inline void* vec_iter_start(struct vector* vec) {
+    return vec->data;
+}
+
+static inline void* vec_iter_end(struct vector* vec) {
+    return vec->data + vec->size * vec->item_size;
+}
+
+static inline void vec_iter_advance(struct vector* vec, void** iter) {
+    *iter = *iter + vec->item_size;
+}
+
 static inline void vec_uninit(struct vector* vec) {
     if (vec->data) {
         free(vec->data);
