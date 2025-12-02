@@ -2,22 +2,61 @@
 #define MODEL_H
 
 #include "mesh.h"
-
-#include "assimp/cimport.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
+#include "shader.h"
+#include "texture.h"
+#include "util.h"
 #include "vector.h"
 
-struct textured_mesh {
-    struct mesh mesh;
-    uint32_t texture_id;
-};
+#include "assimp/cimport.h"
+#include "assimp/material.h"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 
 struct model {
     struct vector meshes;
+    struct vector materials;
 };
 
-static inline struct textured_mesh _model_process_mesh(struct aiMesh* mesh) {
+struct model_mesh {
+    struct mesh mesh;
+    uint32_t material_id;
+};
+
+struct model_material {
+    struct texture diffuse, specular;
+    float shininess;
+};
+
+static inline struct model_material _model_process_material(struct aiMaterial* mat) {
+    struct model_material out;
+
+    if (aiGetMaterialTextureCount(mat, aiTextureType_DIFFUSE) > 0) {
+        texture_create_fallback(&out.diffuse, (vec4){0, 0.2, 0.6, 1});
+    } else {
+        texture_create_fallback(&out.diffuse, (vec4){0, 0.2, 0.6, 1});
+    };
+
+    if (aiGetMaterialTextureCount(mat, aiTextureType_SPECULAR) > 0) {
+        texture_create_fallback(&out.specular, (vec4){1, 1, 1, 1});
+    } else {
+        texture_create_fallback(&out.specular, (vec4){1, 1, 1, 1});
+    };
+
+    if (!aiGetMaterialFloat(mat, AI_MATKEY_SHININESS, &out.shininess))
+        out.shininess = 16;
+
+    return out;
+}
+
+static inline void _model_process_materials(struct model* mod, const struct aiScene* scene) {
+    for (uint32_t i = 0; i < scene->mNumMaterials; i++) {
+        struct aiMaterial* mat = scene->mMaterials[i];
+        struct model_material m = _model_process_material(mat);
+        vec_push(&mod->materials, &m);
+    }
+}
+
+static inline struct model_mesh _model_process_mesh(struct aiMesh* mesh) {
     uint32_t vertex_count = mesh->mNumVertices;
 
     uint32_t index_count = 0;
@@ -39,9 +78,12 @@ static inline struct textured_mesh _model_process_mesh(struct aiMesh* mesh) {
         if (mesh->mTextureCoords[0]) {
             out.vertices[i].tex_coords.x = mesh->mTextureCoords[0][i].x;
             out.vertices[i].tex_coords.y = mesh->mTextureCoords[0][i].y;
+
         } else {
             out.vertices[i].tex_coords = (vec2){0, 0};
         }
+
+        out.vertices[i].tex_coords = (vec2){0, 0};
     }
 
     uint32_t k = 0;
@@ -53,9 +95,9 @@ static inline struct textured_mesh _model_process_mesh(struct aiMesh* mesh) {
 
     mesh_generate(&out);
 
-    return (struct textured_mesh){
+    return (struct model_mesh){
         .mesh = out,
-        .texture_id = 0,
+        .material_id = mesh->mMaterialIndex,
     };
 }
 
@@ -64,7 +106,7 @@ static inline void _model_process_node(struct model* mod,
                                        const struct aiScene* scene) {
     for (uint32_t i = 0; i < node->mNumMeshes; i++) {
         struct aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        struct textured_mesh m = _model_process_mesh(mesh);
+        struct model_mesh m = _model_process_mesh(mesh);
         vec_push(&mod->meshes, &m);
     }
 
@@ -73,7 +115,8 @@ static inline void _model_process_node(struct model* mod,
 }
 
 static inline void model_load(struct model* mod, const char* path) {
-    vec_init(&mod->meshes, sizeof(struct textured_mesh));
+    vec_init(&mod->meshes, sizeof(struct model_mesh));
+    vec_init(&mod->materials, sizeof(struct model_material));
 
     const struct aiScene* scene =
         aiImportFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
@@ -82,17 +125,40 @@ static inline void model_load(struct model* mod, const char* path) {
         panic("model_load: failed to load model\n%s", aiGetErrorString());
 
     _model_process_node(mod, scene->mRootNode, scene);
+    _model_process_materials(mod, scene);
 }
 
-static inline void model_draw(struct model* mod) {
-    for (struct textured_mesh* p = vec_iter_start(&mod->meshes); p != vec_iter_end(&mod->meshes);
+static inline void model_draw(struct model* mod, struct shader* shader) {
+    shader_set_int(shader, "material.diffuse", 0);
+    shader_set_int(shader, "material.specular", 1);
+
+    uint32_t last_material_id = -1;
+    for (struct model_mesh* p = vec_iter_start(&mod->meshes); p != vec_iter_end(&mod->meshes);
          vec_iter_advance(&mod->meshes, (void*)&p)) {
+        if (p->material_id != last_material_id) {
+            struct model_material* material = vec_item(&mod->materials, p->material_id);
+            texture_bind(&material->diffuse, 0);
+            texture_bind(&material->specular, 1);
+            shader_set_float(shader, "material.shininess", material->shininess);
+        }
+
         mesh_draw(&p->mesh);
+
+        last_material_id = p->material_id;
     }
 }
 
 static inline void model_uninit(struct model* mod) {
-    vec_for_each(&mod->meshes, (void (*)(void*))mesh_uninit);
+    for (struct model_mesh* p = vec_iter_start(&mod->meshes); p != vec_iter_end(&mod->meshes);
+         vec_iter_advance(&mod->meshes, (void*)&p))
+        mesh_uninit(&p->mesh);
+
+    for (struct model_material* p = vec_iter_start(&mod->materials);
+         p != vec_iter_end(&mod->materials); vec_iter_advance(&mod->materials, (void*)&p)) {
+        texture_uninit(&p->diffuse);
+        texture_uninit(&p->specular);
+    }
+
     vec_uninit(&mod->meshes);
 }
 

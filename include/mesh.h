@@ -73,8 +73,6 @@ static inline void mesh_generate(struct mesh* m) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->index_count * sizeof(uint32_t), m->indices,
                      GL_STATIC_DRAW);
     }
-
-    glBindVertexArray(0);
 }
 
 static inline void mesh_draw(struct mesh* m) {
@@ -84,7 +82,6 @@ static inline void mesh_draw(struct mesh* m) {
     } else {
         glDrawArrays(GL_TRIANGLES, 0, m->vertex_count);
     }
-    glBindVertexArray(0);
 }
 
 static inline void mesh_uninit(struct mesh* m) {
