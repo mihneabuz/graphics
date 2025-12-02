@@ -8,11 +8,16 @@
 #include "assimp/scene.h"
 #include "vector.h"
 
+struct textured_mesh {
+    struct mesh mesh;
+    uint32_t texture_id;
+};
+
 struct model {
     struct vector meshes;
 };
 
-static inline struct mesh _model_process_mesh(struct aiMesh* mesh) {
+static inline struct textured_mesh _model_process_mesh(struct aiMesh* mesh) {
     uint32_t vertex_count = mesh->mNumVertices;
 
     uint32_t index_count = 0;
@@ -47,7 +52,11 @@ static inline struct mesh _model_process_mesh(struct aiMesh* mesh) {
     }
 
     mesh_generate(&out);
-    return out;
+
+    return (struct textured_mesh){
+        .mesh = out,
+        .texture_id = 0,
+    };
 }
 
 static inline void _model_process_node(struct model* mod,
@@ -55,7 +64,7 @@ static inline void _model_process_node(struct model* mod,
                                        const struct aiScene* scene) {
     for (uint32_t i = 0; i < node->mNumMeshes; i++) {
         struct aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        struct mesh m = _model_process_mesh(mesh);
+        struct textured_mesh m = _model_process_mesh(mesh);
         vec_push(&mod->meshes, &m);
     }
 
@@ -64,7 +73,7 @@ static inline void _model_process_node(struct model* mod,
 }
 
 static inline void model_load(struct model* mod, const char* path) {
-    vec_init(&mod->meshes, sizeof(struct mesh));
+    vec_init(&mod->meshes, sizeof(struct textured_mesh));
 
     const struct aiScene* scene =
         aiImportFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
@@ -76,11 +85,10 @@ static inline void model_load(struct model* mod, const char* path) {
 }
 
 static inline void model_draw(struct model* mod) {
-    for (struct mesh* p = vec_iter_start(&mod->meshes); p != vec_iter_end(&mod->meshes);
+    for (struct textured_mesh* p = vec_iter_start(&mod->meshes); p != vec_iter_end(&mod->meshes);
          vec_iter_advance(&mod->meshes, (void*)&p)) {
-        mesh_draw(p);
+        mesh_draw(&p->mesh);
     }
-    vec_for_each(&mod->meshes, (void (*)(void*))mesh_draw);
 }
 
 static inline void model_uninit(struct model* mod) {
