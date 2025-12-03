@@ -57,12 +57,12 @@ static inline void* vec_item(struct vector* vec, const uint32_t idx) {
     return (uint8_t*)vec->data + idx * vec->item_size;
 }
 
-static inline int vec_get(struct vector* vec, const uint32_t idx, void* dest) {
+static inline int vec_get(struct vector* vec, const uint32_t idx, void* dst) {
     void* item = vec_item(vec, idx);
     if (!item)
         return 0;
 
-    memcpy(dest, item, vec->item_size);
+    memcpy(dst, item, vec->item_size);
     return 1;
 }
 
@@ -101,11 +101,11 @@ static inline void vec_extend(struct vector* vec, const void* from, uint32_t cou
     vec->size += count;
 }
 
-static inline int vec_pop(struct vector* vec, void* dest) {
+static inline int vec_pop(struct vector* vec, void* dst) {
     if (vec->size == 0)
         return 0;
 
-    vec_get(vec, vec->size - 1, dest);
+    vec_get(vec, vec->size - 1, dst);
 
     vec->size -= 1;
 
@@ -137,11 +137,11 @@ static inline void vec_for_each_with_arg(struct vector* vec, mapper_arg f, void*
     }
 }
 
-static inline void vec_clone(const struct vector* src, struct vector* dest) {
-    dest->data = nullptr;
-    dest->size = src->size;
-    dest->capacity = src->capacity;
-    dest->item_size = src->item_size;
+static inline void vec_clone(const struct vector* src, struct vector* dst) {
+    dst->data = nullptr;
+    dst->size = src->size;
+    dst->capacity = src->capacity;
+    dst->item_size = src->item_size;
 
     if (src->capacity > 0) {
         void* data = malloc(src->capacity * src->item_size);
@@ -150,7 +150,7 @@ static inline void vec_clone(const struct vector* src, struct vector* dest) {
 
         memcpy(data, src->data, src->size * src->item_size);
 
-        dest->data = data;
+        dst->data = data;
     }
 }
 

@@ -59,6 +59,19 @@ static inline void string_pop(struct string* str, uint32_t count) {
     string_add_terminator(str);
 }
 
+static inline void string_pop_until(struct string* str, char c) {
+    string_strip_terminator(str);
+
+    while (str->inner.size && *(char*)vec_back(&str->inner) != c)
+        str->inner.size--;
+
+    string_add_terminator(str);
+}
+
+static inline void string_clone(struct string* src, struct string* dst) {
+    vec_clone(&src->inner, &dst->inner);
+}
+
 static inline void string_uninit(struct string* str) {
     vec_uninit(&str->inner);
 }
