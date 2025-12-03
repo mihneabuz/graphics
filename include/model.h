@@ -2,17 +2,18 @@
 #define MODEL_H
 
 #include "mesh.h"
+#include "mstring.h"
 #include "shader.h"
 #include "texture.h"
 #include "util.h"
 #include "vector.h"
 
 #include "assimp/cimport.h"
-#include "assimp/material.h"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
 struct model {
+    struct string path;
     struct vector meshes;
     struct vector materials;
 };
@@ -27,33 +28,41 @@ struct model_material {
     float shininess;
 };
 
-static inline struct model_material _model_process_material(struct aiMaterial* mat) {
-    struct model_material out;
-
-    if (aiGetMaterialTextureCount(mat, aiTextureType_DIFFUSE) > 0) {
-        texture_create_fallback(&out.diffuse, (vec4){0, 0.2, 0.6, 1});
-    } else {
-        texture_create_fallback(&out.diffuse, (vec4){0, 0.2, 0.6, 1});
-    };
-
-    if (aiGetMaterialTextureCount(mat, aiTextureType_SPECULAR) > 0) {
-        texture_create_fallback(&out.specular, (vec4){1, 1, 1, 1});
-    } else {
-        texture_create_fallback(&out.specular, (vec4){1, 1, 1, 1});
-    };
-
-    if (!aiGetMaterialFloat(mat, AI_MATKEY_SHININESS, &out.shininess))
-        out.shininess = 16;
-
-    return out;
-}
-
 static inline void _model_process_materials(struct model* mod, const struct aiScene* scene) {
+    struct string path;
+    string_clone(&mod->path, &path);
+    string_pop_until(&path, '/');
+
     for (uint32_t i = 0; i < scene->mNumMaterials; i++) {
         struct aiMaterial* mat = scene->mMaterials[i];
-        struct model_material m = _model_process_material(mat);
-        vec_push(&mod->materials, &m);
+        struct model_material out = {0};
+        struct aiString tex;
+
+        if (aiGetMaterialTextureCount(mat, aiTextureType_DIFFUSE) > 0) {
+            aiGetMaterialString(mat, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), &tex);
+            string_append(&path, (const char*)&tex.data, tex.length);
+            texture_load_image(&out.diffuse, string_ptr(&path));
+            string_pop(&path, tex.length);
+        } else {
+            texture_create_fallback(&out.diffuse, (vec4){0, 0.2, 0.6, 1});
+        };
+
+        if (aiGetMaterialTextureCount(mat, aiTextureType_SPECULAR) > 0) {
+            aiGetMaterialString(mat, AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0), &tex);
+            string_append(&path, (const char*)&tex.data, tex.length);
+            texture_load_image(&out.specular, string_ptr(&path));
+            string_pop(&path, tex.length);
+        } else {
+            texture_create_fallback(&out.specular, (vec4){1, 1, 1, 1});
+        };
+
+        if (!aiGetMaterialFloat(mat, AI_MATKEY_SHININESS, &out.shininess))
+            out.shininess = 16;
+
+        vec_push(&mod->materials, &out);
     }
+
+    string_uninit(&path);
 }
 
 static inline struct model_mesh _model_process_mesh(struct aiMesh* mesh) {
@@ -82,8 +91,6 @@ static inline struct model_mesh _model_process_mesh(struct aiMesh* mesh) {
         } else {
             out.vertices[i].tex_coords = (vec2){0, 0};
         }
-
-        out.vertices[i].tex_coords = (vec2){0, 0};
     }
 
     uint32_t k = 0;
@@ -115,6 +122,7 @@ static inline void _model_process_node(struct model* mod,
 }
 
 static inline void model_load(struct model* mod, const char* path) {
+    string_init(&mod->path);
     vec_init(&mod->meshes, sizeof(struct model_mesh));
     vec_init(&mod->materials, sizeof(struct model_material));
 
@@ -123,6 +131,8 @@ static inline void model_load(struct model* mod, const char* path) {
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         panic("model_load: failed to load model\n%s", aiGetErrorString());
+
+    string_append(&mod->path, path, strlen(path));
 
     _model_process_node(mod, scene->mRootNode, scene);
     _model_process_materials(mod, scene);
@@ -159,7 +169,9 @@ static inline void model_uninit(struct model* mod) {
         texture_uninit(&p->specular);
     }
 
+    vec_uninit(&mod->materials);
     vec_uninit(&mod->meshes);
+    string_uninit(&mod->path);
 }
 
 #endif

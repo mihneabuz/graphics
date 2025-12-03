@@ -5,10 +5,10 @@ static struct shader Shader;
 static struct model Model;
 
 static struct point_light Light = {
-    .pos = {0.0, 3.0, 2.0},
+    .pos = {1.0, 1.0, 0.4},
 
-    .ambient = {0.1, 0.1, 0.1},
-    .diffuse = {0.5, 0.5, 0.5},
+    .ambient = {0.3, 0.3, 0.3},
+    .diffuse = {0.8, 0.8, 0.8},
     .specular = {1, 1, 1},
 
     .constant = 1.0,
@@ -21,13 +21,13 @@ void draw() {
 
     shader_activate(&Shader);
 
-    shader_set_point_light(&Shader, "light", &Light);
-    shader_set_vec3(&Shader, "viewPos", camera_pos(DebugCamera));
-
     mat4 projection = camera_projection(DebugCamera, window_aspect_ratio());
     mat4 view = camera_view(DebugCamera);
     mat4 model = rotate_y(10 * window_time());
     shader_set_transform(&Shader, &model, &view, &projection);
+
+    shader_set_point_light(&Shader, "light", &Light);
+    shader_set_vec3(&Shader, "viewPos", camera_pos(DebugCamera));
 
     model_draw(&Model, &Shader);
 }
@@ -41,6 +41,7 @@ int main() {
     model_load(&Model, "assets/backpack/backpack.obj");
 
     debug_camera_init((vec3){0, 0, 8});
+    camera_set_y_bounds(DebugCamera, -5, 5);
     window_register_debug_camera();
 
     window_set_render_callback(draw);
