@@ -11,11 +11,19 @@ uint8_t png_sig[8] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
 enum png_color_spec { SRGB = 1 };
 
+enum png_color_type {
+    TRUECOLOR = 1,
+    TRUECOLOR_A,
+    GRAYSCALE,
+    GRAYSCALE_A,
+    INDEXED,
+};
+
 struct png_parser_state {
     uint32_t width, height, channels;
 
     uint8_t bit_depth;
-    uint8_t color_indexed;
+    uint8_t color_type;
     enum png_color_spec color_spec;
 
     struct vector palette;
@@ -29,7 +37,7 @@ static inline void png_parser_state_init(struct png_parser_state* state) {
     state->height = 0;
     state->channels = 0;
     state->bit_depth = 0;
-    state->color_indexed = 0;
+    state->color_type = 0;
     state->color_spec = SRGB;
     state->done = 0;
     vec_init(&state->encoded_data, 1);
@@ -69,24 +77,28 @@ static inline int png_parse_ihdr_chunk(struct png_chunk* chunk, struct png_parse
     uint8_t color_type = *(uint8_t*)(chunk->data + 9);
     switch (color_type) {
         case 0:  // Grayscale
-            state->channels = 1;
+            state->channels = 3;
+            state->color_type = GRAYSCALE;
             break;
 
         case 2:  // Truecolor
             state->channels = 3;
+            state->color_type = TRUECOLOR;
             break;
 
         case 3:  // Indexed-color
             state->channels = 3;
-            state->color_indexed = 1;
+            state->color_type = INDEXED;
             break;
 
         case 4:  // Grayscale with alpha
-            state->channels = 2;
+            state->channels = 4;
+            state->color_type = GRAYSCALE_A;
             break;
 
         case 6:  // Truecolor with alpha
             state->channels = 4;
+            state->color_type = TRUECOLOR_A;
             break;
     }
 
@@ -264,15 +276,68 @@ static inline void png_load(struct png_parser_state* state, struct image* img) {
 
     zlib_inflate(inflated_data, inflated_size, state->encoded_data.data, state->encoded_data.size);
 
-    // TODO: handle palette and different bit_depth
+    enum png_color_type type = state->color_type;
+
+    uint32_t bpp = 0;
+    uint8_t* temp = nullptr;
+    uint8_t* temp_prev = nullptr;
+    switch (type) {
+        case GRAYSCALE:
+        case INDEXED:
+            bpp = 1;
+            temp = malloc(img->width);
+            temp_prev = malloc(img->width);
+            break;
+
+        case GRAYSCALE_A:
+            bpp = 2;
+            temp = malloc(img->width * 2);
+            temp_prev = malloc(img->width * 2);
+            break;
+
+        default:
+            bpp = img->channels;
+    }
+
+    // TODO: handle different bit_depth
 
     uint8_t* prev = nullptr;
     for (uint32_t i = 0; i < img->height; i++) {
-        uint8_t* line = &inflated_data[i * (img->width * img->channels + 1)];
+        uint8_t* line = &inflated_data[i * (img->width * bpp + 1)];
         uint8_t* img_line = &img->data[(img->height - 1 - i) * img->width * img->channels];
-        png_unfilter_line(img_line, line, prev, img->width * img->channels, img->channels);
-        prev = img_line;
+
+        switch (type) {
+            case TRUECOLOR:
+            case TRUECOLOR_A:
+                png_unfilter_line(img_line, line, prev, img->width * bpp, bpp);
+                prev = img_line;
+                break;
+
+            case GRAYSCALE:
+            case GRAYSCALE_A:
+                png_unfilter_line(temp, line, prev, img->width * bpp, bpp);
+                for (uint32_t j = 0; j < img->width; j++) {
+                    uint8_t* p = &img_line[j * img->channels];
+                    p[0] = temp[j];
+                    p[1] = temp[j];
+                    p[2] = temp[j];
+                }
+                prev = temp;
+                temp = temp_prev;
+                temp_prev = prev;
+                break;
+
+            case INDEXED:
+                // TODO: handle color palette
+                break;
+        }
     }
+
+    if (temp)
+        free(temp);
+
+    if (temp_prev)
+        free(temp_prev);
 
     free(inflated_data);
 }

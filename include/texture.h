@@ -22,7 +22,7 @@ static inline void texture_load_image(struct texture* tex, const char* path) {
 
     int ret = image_load(path, &img);
     if (!ret)
-        panic("texture_load_image: failed to load image");
+        panic("texture_load_image: failed to load image %s", path);
 
     GLuint texture;
     glGenTextures(1, &texture);

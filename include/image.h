@@ -20,7 +20,7 @@ static inline int image_load(const char* path, struct image* img) {
 
     uint8_t* raw = (uint8_t*)read_file(path);
     if (!raw)
-        return 1;
+        return 0;
 
     struct image_loader loaders[] = {
         {png_sig, sizeof(png_sig), png_parse},
